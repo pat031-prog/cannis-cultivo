@@ -23,14 +23,332 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+// ─── VPD Helpers ────────────────────────────────────────────────────────────
+
+function calcVPD(temp: number, humidity: number): number {
+  return 0.6108 * Math.exp(17.27 * temp / (temp + 237.3)) * (1 - humidity / 100);
+}
+
+function vpdColor(vpd: number): string {
+  if (vpd < 0.4) return 'text-blue-400';
+  if (vpd < 0.8) return 'text-emerald-400';
+  if (vpd <= 1.2) return 'text-emerald-400';
+  if (vpd <= 1.6) return 'text-amber-400';
+  return 'text-red-400';
+}
+
+function vpdGlowClass(vpd: number): string {
+  if (vpd < 0.4) return 'drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]';
+  if (vpd <= 1.2) return 'drop-shadow-[0_0_8px_rgba(16,185,129,0.6)]';
+  if (vpd <= 1.6) return 'drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]';
+  return 'drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]';
+}
+
+function vpdLabel(vpd: number): string {
+  if (vpd < 0.4) return 'Demasiado bajo';
+  if (vpd < 0.8) return 'Óptimo vegetativo';
+  if (vpd <= 1.2) return 'Óptimo floración';
+  if (vpd <= 1.6) return 'Alto';
+  return 'Peligro — demasiado alto';
+}
+
+// ─── Deterministic Sparkline ─────────────────────────────────────────────────
+
+function deterministicSparkline(loteId: string, base: number, length = 12): number[] {
+  // Use char codes of loteId as seed, no Math.random()
+  const seed = loteId.split('').reduce((acc, c, i) => acc + c.charCodeAt(0) * (i + 1), 0);
+  return Array.from({ length }, (_, i) => {
+    const angle = i * 0.8 + (seed % 100) * 0.01;
+    const wave = Math.sin(angle) * 1.5;
+    // pseudo-random deterministic noise: use sin of a different frequency
+    const noise = Math.sin(angle * 3.7 + seed * 0.001) * 0.4;
+    return base + wave + noise;
+  });
+}
+
+function buildPolylinePoints(values: number[], w = 120, h = 30): string {
+  if (values.length < 2) return '';
+  const minV = Math.min(...values) - 0.5;
+  const maxV = Math.max(...values) + 0.5;
+  const range = maxV - minV || 1;
+  return values
+    .map((v, i) => {
+      const x = (i / (values.length - 1)) * w;
+      const y = h - ((v - minV) / range) * h;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(' ');
+}
+
+// ─── Sub-metric chip progress bar ────────────────────────────────────────────
+
+function progressPercent(value: number, min: number, max: number): number {
+  return Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+}
+
+// ─── Semáforo LED ─────────────────────────────────────────────────────────────
+
+function LedSemaforo({ estado }: { estado: 'green' | 'amber' | 'red' }) {
+  const cfg = {
+    green: { bg: 'bg-emerald-500', shadow: 'shadow-emerald-500/60' },
+    amber: { bg: 'bg-amber-400',   shadow: 'shadow-amber-400/60' },
+    red:   { bg: 'bg-red-500',     shadow: 'shadow-red-500/60' },
+  }[estado];
+
+  return (
+    <span
+      className={`
+        inline-block w-2.5 h-2.5 rounded-full animate-pulse shadow-lg
+        ${cfg.bg} ${cfg.shadow}
+      `}
+    />
+  );
+}
+
+// ─── Sensor Sub-Metric Chip ───────────────────────────────────────────────────
+
+function SensorChip({
+  icon,
+  value,
+  unit,
+  min,
+  max,
+  barColor = 'bg-emerald-500',
+}: {
+  icon: React.ReactNode;
+  value: number;
+  unit: string;
+  min: number;
+  max: number;
+  barColor?: string;
+}) {
+  const pct = progressPercent(value, min, max);
+  return (
+    <div className="flex-1 min-w-0 bg-[#090d10]/60 border border-[#1e293b]/80 rounded-xl p-2.5 flex flex-col gap-1.5 min-h-[44px]">
+      <div className="flex items-center gap-1">
+        {icon}
+        <span className="font-bold text-sm text-foreground leading-none">{value.toFixed(1)}</span>
+        <span className="text-[10px] text-muted-foreground leading-none">{unit}</span>
+      </div>
+      {/* progress bar */}
+      <div className="h-1 w-full rounded-full bg-[#1e293b]">
+        <div
+          className={`h-1 rounded-full transition-all duration-700 ${barColor}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Carpa Card ───────────────────────────────────────────────────────────────
+
+function CarpaCard({ carpa }: { carpa: any }) {
+  const { estadoSemaforo, sensores, lote, ubicacion, genetica, fase, semana, dia, totalDesvios } = carpa;
+
+  const temp: number = sensores.temp.actual;
+  const humidity: number = sensores.humedad.actual;
+  const vpd = calcVPD(temp, humidity);
+
+  // Sparkline data (deterministic, based on lote.id)
+  const sparkPoints = deterministicSparkline(lote.id, temp);
+  const polyline = buildPolylinePoints(sparkPoints);
+
+  // Card border/glow based on semáforo state
+  const borderClass =
+    estadoSemaforo === 'red'
+      ? 'border-red-500/40 shadow-red-950/10'
+      : estadoSemaforo === 'amber'
+      ? 'border-amber-500/30 shadow-amber-950/10'
+      : 'border-[#1e293b] hover:border-emerald-500/20';
+
+  // Sparkline stroke color
+  const sparkStroke =
+    estadoSemaforo === 'red' ? '#ef4444' : estadoSemaforo === 'amber' ? '#f59e0b' : '#10b981';
+
+  const { setSelectedLoteId } = useAppContext();
+
+  return (
+    <div
+      className={`
+        snap-center min-w-[280px] flex-shrink-0
+        md:min-w-0 md:flex-shrink
+        bg-[#10161d] border rounded-2xl p-5 flex flex-col min-h-[280px]
+        relative overflow-hidden group shadow-lg transition-all
+        ${borderClass}
+      `}
+    >
+      {/* Top accent bar */}
+      <div
+        className={`absolute top-0 left-0 right-0 h-[2px] ${
+          estadoSemaforo === 'red'
+            ? 'bg-gradient-to-r from-red-500 to-red-400'
+            : estadoSemaforo === 'amber'
+            ? 'bg-gradient-to-r from-amber-500 to-yellow-400'
+            : 'bg-gradient-to-r from-emerald-600 to-teal-500'
+        }`}
+      />
+
+      {/* ── HEADER: title + LED ── */}
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="space-y-0.5 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <MapPin className="w-3 h-3 text-emerald-500 shrink-0" />
+            <span className="font-bold text-xs tracking-wide text-foreground truncate">
+              {ubicacion?.posicion}
+            </span>
+            <span className="text-[10px] text-muted-foreground shrink-0">
+              ({ubicacion?.sala})
+            </span>
+          </div>
+          <h3 className="font-extrabold text-sm text-foreground group-hover:text-emerald-400 transition-colors leading-tight truncate">
+            {genetica?.nombre ?? 'Sin genética'}
+          </h3>
+          <span className="text-[10px] text-muted-foreground block">
+            Lote: <b>{lote.codigo}</b> · Sem <b>{semana}</b> D<b>{dia}</b> · {fase}
+          </span>
+        </div>
+
+        {/* LED semáforo */}
+        <div className="flex flex-col items-center gap-1 shrink-0">
+          <LedSemaforo estado={estadoSemaforo} />
+          <span
+            className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-full border ${
+              estadoSemaforo === 'red'
+                ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                : estadoSemaforo === 'amber'
+                ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+            }`}
+          >
+            {estadoSemaforo === 'red' ? 'ALERTA' : estadoSemaforo === 'amber' ? 'DESVÍO' : 'OK'}
+          </span>
+        </div>
+      </div>
+
+      {/* ── VPD HERO METRIC ── */}
+      <div className="flex flex-col items-center justify-center py-3 border-y border-[#1e293b]/50 mb-3">
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">
+          VPD
+        </span>
+        <span
+          className={`text-5xl font-black leading-none tabular-nums ${vpdColor(vpd)} ${vpdGlowClass(vpd)}`}
+        >
+          {vpd.toFixed(2)}
+        </span>
+        <span className="text-[10px] text-muted-foreground mt-1 font-medium">
+          {vpdLabel(vpd)}
+        </span>
+        <span className="text-[9px] text-muted-foreground/60 mt-0.5">
+          rango óptimo: 0.8 – 1.2 kPa
+        </span>
+      </div>
+
+      {/* ── SENSOR SUB-METRICS (3 chips) ── */}
+      <div className="flex gap-2 mb-3">
+        {/* Temperature chip */}
+        <SensorChip
+          icon={<Thermometer className="w-3 h-3 text-orange-400 shrink-0" />}
+          value={temp}
+          unit="°C"
+          min={15}
+          max={35}
+          barColor={
+            Math.abs(temp - sensores.temp.esperado) >= 3 ? 'bg-amber-400' : 'bg-orange-400'
+          }
+        />
+        {/* Humidity chip */}
+        <SensorChip
+          icon={<Droplet className="w-3 h-3 text-blue-400 shrink-0" />}
+          value={humidity}
+          unit="%"
+          min={30}
+          max={90}
+          barColor={
+            Math.abs(humidity - sensores.humedad.esperado) >= 10 ? 'bg-amber-400' : 'bg-blue-400'
+          }
+        />
+        {/* CO2 / Luz chip (static) */}
+        <SensorChip
+          icon={<Sun className="w-3 h-3 text-emerald-400 shrink-0" />}
+          value={420}
+          unit="ppm"
+          min={300}
+          max={1200}
+          barColor="bg-emerald-500"
+        />
+      </div>
+
+      {/* ── SPARKLINE (deterministic, temp history) ── */}
+      <div className="w-full mb-3">
+        <svg
+          viewBox="0 0 120 30"
+          preserveAspectRatio="none"
+          className="w-full h-[30px]"
+          aria-hidden="true"
+        >
+          {/* Subtle gradient fill under the line */}
+          <defs>
+            <linearGradient id={`spark-fill-${lote.id}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={sparkStroke} stopOpacity="0.2" />
+              <stop offset="100%" stopColor={sparkStroke} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          {/* Area fill */}
+          {polyline && (
+            <polygon
+              points={`0,30 ${polyline} 120,30`}
+              fill={`url(#spark-fill-${lote.id})`}
+            />
+          )}
+          {/* Line */}
+          <polyline
+            fill="none"
+            stroke={sparkStroke}
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            points={polyline}
+          />
+          {/* Current dot */}
+          {sparkPoints.length > 0 && (() => {
+            const lastIdx = sparkPoints.length - 1;
+            const lastY = 30 - ((sparkPoints[lastIdx] - Math.min(...sparkPoints) + 0.5) / (Math.max(...sparkPoints) - Math.min(...sparkPoints) + 1)) * 30;
+            return <circle cx="120" cy={lastY.toFixed(1)} r="2.5" fill={sparkStroke} />;
+          })()}
+        </svg>
+        <div className="flex justify-between mt-0.5 px-0.5">
+          <span className="text-[8px] text-muted-foreground/50">Historial temp.</span>
+          <span className="text-[8px] text-muted-foreground/50">{temp.toFixed(1)}°C ahora</span>
+        </div>
+      </div>
+
+      {/* ── FOOTER: desvíos + link ── */}
+      <div className="mt-auto border-t border-[#1e293b]/50 pt-2.5 flex justify-between items-center">
+        <span className="text-[10px] text-muted-foreground">
+          {totalDesvios} desvíos en ciclo
+        </span>
+        <Link
+          href="/informe"
+          onClick={() => setSelectedLoteId(lote.id)}
+          className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 group/btn min-h-[44px] flex items-center"
+        >
+          <span>Ver Informe</span>
+          <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function DirectorDashboardPage() {
   const { lotes, recargarLotes, setSelectedLoteId } = useAppContext();
   
-  // Lista de todas las carpas y su telemetría asociada
   const [carpasData, setCarpasData] = useState<any[]>([]);
   const [desviosHoy, setDesviosHoy] = useState<any[]>([]);
   
-  // Estados para el formulario de Lanzar Lote
   const [showLaunchForm, setShowLaunchForm] = useState(false);
   const [nuevaGenetica, setNuevaGenetica] = useState('');
   const [nuevaUbicacion, setNuevaUbicacion] = useState('');
@@ -41,23 +359,19 @@ export default function DirectorDashboardPage() {
   const fechaHoy = '2026-05-21';
 
   const cargarDatos = () => {
-    // 1. Cargar carpas activas
     const list = lotes.map(l => {
       const ubi = mockDb.ubicaciones.find(u => u.id === l.ubicacion_id);
       const gen = mockDb.geneticas.find(g => g.id === l.plantilla_id || g.id === 'gen-1');
       const sensores = mockDb.getSensoresEnVivo(l.ubicacion_id);
       
-      // Calcular día de cultivo
       const diaCiclo = mockDb.calcularDiaDeCiclo(l.fecha_inicio, fechaHoy);
       const sem = Math.floor((diaCiclo - 1) / 7) + 1;
       const dia = ((diaCiclo - 1) % 7) + 1;
       
-      // Obtener fase
       const plan = mockDb.plantillas.find(p => p.id === l.plantilla_id);
       const diaPlan = plan?.dias?.find(d => d.semana === sem && d.dia === dia);
       const fase = diaPlan?.fase || 'vegetativo';
 
-      // Calcular desvíos para saber el color del semáforo
       const desvios = mockDb.getDesviosLote(l.id);
       const desviosRecientes = desvios.filter(d => d.fecha === fechaHoy);
       
@@ -68,12 +382,10 @@ export default function DirectorDashboardPage() {
         estadoSemaforo = 'amber';
       }
 
-      // Check de sensores fuera de rango
       const tempFuera = Math.abs(sensores.temp.actual - sensores.temp.esperado) >= 3;
       const humFuera = Math.abs(sensores.humedad.actual - sensores.humedad.esperado) >= 10;
       
       if (tempFuera || humFuera) {
-        // Un sensor muy fuera de rango sube la alarma a rojo
         estadoSemaforo = Math.max(estadoSemaforo === 'red' ? 2 : 1, 1) === 2 ? 'red' : 'amber';
       }
 
@@ -93,7 +405,6 @@ export default function DirectorDashboardPage() {
 
     setCarpasData(list);
 
-    // 2. Acumular todos los desvíos del día
     const desviosTotales: any[] = [];
     lotes.forEach(l => {
       const loteDesvios = mockDb.getDesviosLote(l.id).filter(d => d.fecha === fechaHoy);
@@ -115,7 +426,6 @@ export default function DirectorDashboardPage() {
     const t = setTimeout(() => {
       cargarDatos();
     }, 0);
-    // Simular telemetría en tiempo real: Actualizar cada 5 segundos
     const interval = setInterval(() => {
       cargarDatos();
     }, 5000);
@@ -132,18 +442,16 @@ export default function DirectorDashboardPage() {
       return;
     }
 
-    // Crear Lote en mock db
     mockDb.crearLote({
       plantilla_id: nuevaPlantilla,
       ubicacion_id: nuevaUbicacion,
       fecha_inicio: fechaHoy,
-      responsable_id: 'usr-2', // Juan jardinero por defecto
+      responsable_id: 'usr-2',
     }, cantPlantas, colorPrecinto);
 
     recargarLotes();
     setShowLaunchForm(false);
     
-    // Limpiar formulario
     setNuevaGenetica('');
     setNuevaUbicacion('');
     setNuevaPlantilla('');
@@ -151,7 +459,6 @@ export default function DirectorDashboardPage() {
     alert('¡Lote lanzado con éxito! Se han generado las plantas individuales y sus precintos de trazabilidad en Supabase.');
   };
 
-  // Carpas vacías disponibles para lanzar lote
   const carpasDisponibles = mockDb.ubicaciones.filter(
     u => u.tipo === 'carpa' && !lotes.some(l => l.ubicacion_id === u.id && l.estado === 'activo')
   );
@@ -171,10 +478,9 @@ export default function DirectorDashboardPage() {
           </p>
         </div>
         
-        {/* Lanzar lote botón */}
         <button
           onClick={() => setShowLaunchForm(!showLaunchForm)}
-          className="self-start sm:self-center py-2 px-4 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-slate-900 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-lg shadow-emerald-500/10"
+          className="self-start sm:self-center min-h-[44px] py-2 px-4 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-slate-900 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-lg shadow-emerald-500/10"
         >
           <Plus className="w-4 h-4 text-slate-900" />
           <span>Lanzar Lote de Cultivo</span>
@@ -193,7 +499,7 @@ export default function DirectorDashboardPage() {
             </h3>
             <button
               onClick={() => setShowLaunchForm(false)}
-              className="text-xs text-muted-foreground hover:text-foreground"
+              className="text-xs text-muted-foreground hover:text-foreground min-h-[44px] px-2"
             >
               Cancelar
             </button>
@@ -201,7 +507,6 @@ export default function DirectorDashboardPage() {
 
           <form onSubmit={handleLaunchLote} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             
-            {/* Selección de Genética */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Genética de Cepa</label>
               <select
@@ -220,7 +525,6 @@ export default function DirectorDashboardPage() {
               </select>
             </div>
 
-            {/* Selección de Carpa */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Ubicación (Carpa Vacía)</label>
               <select
@@ -238,7 +542,6 @@ export default function DirectorDashboardPage() {
               </select>
             </div>
 
-            {/* Cantidad de Plantas */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Cantidad de Especímenes</label>
               <input
@@ -251,7 +554,6 @@ export default function DirectorDashboardPage() {
               />
             </div>
 
-            {/* Color de Precinto */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Color de Precinto Físico (INASE)</label>
               <select
@@ -266,7 +568,6 @@ export default function DirectorDashboardPage() {
               </select>
             </div>
 
-            {/* Asignación de Jardinero */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Responsable Asignado</label>
               <div className="w-full bg-[#090d10]/40 border border-[#1e293b]/70 text-sm text-muted-foreground rounded-lg px-3 py-2 flex items-center gap-2">
@@ -275,11 +576,10 @@ export default function DirectorDashboardPage() {
               </div>
             </div>
 
-            {/* Botón de Envío */}
             <div className="flex items-end">
               <button
                 type="submit"
-                className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-900 rounded-lg text-xs font-bold transition-all shadow-md shadow-emerald-500/10"
+                className="w-full min-h-[44px] py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-900 rounded-lg text-xs font-bold transition-all shadow-md shadow-emerald-500/10"
               >
                 Generar Precintos e Iniciar Ciclo
               </button>
@@ -289,143 +589,37 @@ export default function DirectorDashboardPage() {
         </div>
       )}
 
-      {/* 3. GRILLA PRINCIPAL DE CARPAS CON SEMÁFOROS Y SENSORES */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {carpasData.map((carpa) => {
-          const isRed = carpa.estadoSemaforo === 'red';
-          const isAmber = carpa.estadoSemaforo === 'amber';
-          
-          return (
-            <div
-              key={carpa.lote.id}
-              className={`bg-[#10161d] border rounded-2xl p-5 space-y-5 transition-all relative overflow-hidden group shadow-lg ${
-                isRed ? 'border-red-500/30 bg-red-950/[0.01] hover:border-red-500/40 shadow-red-950/5' : 
-                isAmber ? 'border-amber-500/30 bg-amber-950/[0.01] hover:border-amber-500/40 shadow-amber-950/5' : 
-                'border-[#1e293b] hover:border-[#10b981]/20 shadow-black/5'
-              }`}
-            >
-              
-              {/* Header de Tarjeta (Info Lote y Semáforo) */}
-              <div className="flex items-start justify-between gap-2 border-b border-[#1e293b]/50 pb-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-emerald-500" />
-                    <span className="font-bold text-sm tracking-wide text-foreground">{carpa.ubicacion?.posicion}</span>
-                    <span className="text-[10px] text-muted-foreground">({carpa.ubicacion?.sala})</span>
-                  </div>
-                  <h3 className="font-extrabold text-base text-foreground group-hover:text-emerald-400 transition-colors">
-                    {carpa.genetica?.nombre}
-                  </h3>
-                  <span className="text-[10px] text-muted-foreground block">
-                    Lote: <b>{carpa.lote.codigo}</b>
-                  </span>
-                </div>
-
-                {/* Semáforo Visual */}
-                <div className="flex items-center gap-2">
-                  <div className="flex flex-col items-end">
-                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-extrabold border ${
-                      isRed ? 'bg-red-500/10 text-red-400 border-red-500/20' : 
-                      isAmber ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 
-                      'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                    }`}>
-                      {isRed ? 'ANOMALÍA' : isAmber ? 'DESVÍO' : 'EN ORDEN'}
-                    </span>
-                    <span className="text-[8px] text-muted-foreground uppercase tracking-wider pt-0.5">
-                      Fase {carpa.fase}
-                    </span>
-                  </div>
-                  {/* Luz parpadeante */}
-                  <div className={`w-3.5 h-3.5 rounded-full border shadow-inner ${
-                    isRed ? 'bg-red-500 border-red-400 shadow-red-950 animate-ping' : 
-                    isAmber ? 'bg-amber-400 border-amber-300 shadow-amber-950' : 
-                    'bg-emerald-500 border-emerald-400 shadow-emerald-950'
-                  }`} />
-                </div>
-              </div>
-
-              {/* Fila de Progreso del Ciclo */}
-              <div className="flex items-center justify-between text-xs bg-[#090d10]/40 border border-[#1e293b]/70 p-2.5 rounded-lg">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-emerald-500" />
-                  <span>Semana <b>{carpa.semana}</b> · Día <b>{carpa.dia}</b></span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Layers className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="text-[10px] text-muted-foreground font-bold">Total Ciclo: 8w</span>
-                </div>
-              </div>
-
-              {/* TELEMETRÍA DE SENSORES EN VIVO CON SPARKLINE Y LÍMITES PLAN */}
-              <div className="grid grid-cols-2 gap-3.5">
-                
-                {/* 1. Sensor Temperatura */}
-                {renderSensorCard(
-                  'Temperatura',
-                  carpa.sensores.temp.actual,
-                  '°C',
-                  carpa.sensores.temp.esperado,
-                  3, // tolerancia
-                  carpa.sensores.temp.historico,
-                  <Thermometer className="w-4 h-4 text-orange-500" />
-                )}
-
-                {/* 2. Sensor Humedad */}
-                {renderSensorCard(
-                  'Humedad Relativa',
-                  carpa.sensores.humedad.actual,
-                  '%',
-                  carpa.sensores.humedad.esperado,
-                  10, // tolerancia
-                  carpa.sensores.humedad.historico,
-                  <Droplet className="w-4 h-4 text-blue-400" />
-                )}
-
-                {/* 3. VPD (Déficit Presión Vapor) */}
-                {renderSensorCard(
-                  'Déficit Vapor (VPD)',
-                  carpa.sensores.vpd.actual,
-                  ' kPa',
-                  carpa.sensores.vpd.esperado,
-                  0.3, // tolerancia
-                  carpa.sensores.vpd.historico,
-                  <Activity className="w-4 h-4 text-purple-400" />
-                )}
-
-                {/* 4. CO2 */}
-                {renderSensorCard(
-                  'Nivel CO₂',
-                  carpa.sensores.co2.actual,
-                  ' ppm',
-                  carpa.sensores.co2.esperado,
-                  150, // tolerancia
-                  carpa.sensores.co2.historico,
-                  <Sun className="w-4 h-4 text-emerald-400" />
-                )}
-
-              </div>
-
-              {/* Botón rápido para ir al análisis de este lote */}
-              <div className="border-t border-[#1e293b]/50 pt-3 flex justify-between items-center">
-                <span className="text-[10px] text-muted-foreground">
-                  {carpa.totalDesvios} desvíos acumulados en ciclo
-                </span>
-                <Link
-                  href="/informe"
-                  onClick={() => setSelectedLoteId(carpa.lote.id)}
-                  className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 group/btn"
-                >
-                  <span>Ver Informe Nerd</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-                </Link>
-              </div>
-
+      {/* 3. GRILLA PRINCIPAL DE CARPAS */}
+      <div>
+        {/* Mobile: horizontal scroll with snap */}
+        <div className="md:hidden overflow-x-auto flex gap-4 snap-x snap-mandatory pb-4 -mx-4 px-4">
+          {carpasData.map((carpa) => (
+            <CarpaCard key={carpa.lote.id} carpa={carpa} />
+          ))}
+          {carpasData.length === 0 && (
+            <div className="min-w-[280px] snap-center flex items-center justify-center p-8 bg-[#10161d] border border-dashed border-[#1e293b] rounded-2xl text-muted-foreground text-xs text-center">
+              No hay carpas activas.
             </div>
-          );
-        })}
+          )}
+        </div>
+
+        {/* Desktop: responsive grid */}
+        <div
+          className={`hidden md:grid gap-6 ${
+            carpasData.length === 1
+              ? 'grid-cols-1 max-w-sm'
+              : carpasData.length === 2
+              ? 'grid-cols-2'
+              : 'grid-cols-2 lg:grid-cols-3'
+          }`}
+        >
+          {carpasData.map((carpa) => (
+            <CarpaCard key={carpa.lote.id} carpa={carpa} />
+          ))}
+        </div>
       </div>
 
-      {/* 4. PANEL INFERIOR: ALIMENTACIÓN EN TIEMPO REAL DE DESVÍOS REGISTRADOS HOY */}
+      {/* 4. PANEL INFERIOR: FEED DE DESVÍOS */}
       <div className="bg-[#10161d] border border-[#1e293b] p-6 rounded-2xl space-y-4">
         <div className="flex items-center justify-between border-b border-[#1e293b] pb-3">
           <div>
@@ -442,7 +636,6 @@ export default function DirectorDashboardPage() {
           </span>
         </div>
 
-        {/* Listado de desvíos */}
         <div className="space-y-2 max-h-80 overflow-y-auto no-scrollbar">
           {desviosHoy.map((desvio, idx) => {
             const esGrave = desvio.gravedadGeneral === 'grave';
@@ -458,14 +651,13 @@ export default function DirectorDashboardPage() {
                 }`}
               >
                 
-                {/* Info Izquierda */}
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-xs text-foreground tracking-wide">{desvio.carpaNombre}</span>
                     <span className="text-[10px] text-muted-foreground font-bold bg-[#10161d] px-2 py-0.5 rounded border border-[#1e293b]">
                       {desvio.geneticaNombre}
                     </span>
-                    <span className={`text-[8.5px] px-1.5 py-0.2 rounded font-extrabold uppercase ${
+                    <span className={`text-[8.5px] px-1.5 py-0.5 rounded font-extrabold uppercase ${
                       esGrave ? 'text-red-400 bg-red-500/10' :
                       esModerado ? 'text-amber-400 bg-amber-500/10' : 'text-slate-400 bg-slate-500/10'
                     }`}>
@@ -473,7 +665,6 @@ export default function DirectorDashboardPage() {
                     </span>
                   </div>
                   
-                  {/* Breve descripción del desvío */}
                   <div className="text-xs text-foreground font-semibold flex items-center gap-1.5 pt-0.5">
                     {desvio.tipoDesvio === 'no_realizada' ? (
                       <span className="text-red-400">Tarea obligatoria de <b>{desvio.accionTipo}</b> no fue realizada por el Jardinero.</span>
@@ -498,7 +689,6 @@ export default function DirectorDashboardPage() {
                   )}
                 </div>
 
-                {/* Info Derecha (Hora y Acción) */}
                 <div className="flex items-center gap-2 self-end sm:self-center">
                   <div className="text-right">
                     <span className="text-[10px] text-muted-foreground block">Hora de registro</span>
@@ -518,84 +708,6 @@ export default function DirectorDashboardPage() {
             </div>
           )}
         </div>
-      </div>
-
-    </div>
-  );
-}
-
-// RENDER HELPER PARA TARJETAS DE SENSORES EN VIVO
-function renderSensorCard(
-  title: string,
-  actual: number,
-  unit: string,
-  esperado: number,
-  tolerancia: number,
-  historico: number[],
-  Icon: React.ReactNode
-) {
-  const diff = Math.abs(actual - esperado);
-  const estaFuera = diff >= tolerancia;
-
-  // sparkline SVG cálculo
-  const width = 80;
-  const height = 24;
-  const points = historico.map((val, idx) => {
-    const x = (idx / (historico.length - 1)) * width;
-    
-    // mapear rango al tamaño vertical del SVG
-    const minVal = Math.min(...historico) - 1;
-    const maxVal = Math.max(...historico) + 1;
-    const range = maxVal - minVal || 1;
-    const y = height - ((val - minVal) / range) * height;
-    
-    return `${x},${y}`;
-  }).join(' ');
-
-  return (
-    <div className={`p-3 rounded-xl bg-[#090d10]/40 border text-left transition-all ${
-      estaFuera ? 'border-amber-500/20 bg-amber-500/[0.01]' : 'border-[#1e293b]/70 hover:border-[#1e293b]'
-    }`}>
-      
-      {/* Label */}
-      <div className="flex items-center justify-between gap-1 text-[10px] text-muted-foreground font-bold uppercase tracking-wider pb-1">
-        <span className="truncate pr-1">{title}</span>
-        {Icon}
-      </div>
-
-      {/* Valor Actual y Diferencia */}
-      <div className="flex items-baseline gap-1.5">
-        <span className={`font-extrabold text-base tracking-wide ${estaFuera ? 'text-amber-400 font-black' : 'text-foreground'}`}>
-          {actual}{unit}
-        </span>
-        
-        {diff > 0 && (
-          <span className={`text-[9px] font-bold ${estaFuera ? 'text-amber-400' : 'text-muted-foreground'}`}>
-            ({actual > esperado ? `+${(actual - esperado).toFixed(1)}` : (actual - esperado).toFixed(1)})
-          </span>
-        )}
-      </div>
-
-      {/* Rango Esperado del Plan y Mini Sparkline */}
-      <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#1e293b]/30 mt-1">
-        <div>
-          <span className="text-[8px] text-muted-foreground block uppercase font-bold">Plan</span>
-          <span className="text-[10px] font-bold text-foreground">{esperado}{unit}</span>
-        </div>
-        
-        {/* Mini Sparkline SVG */}
-        {historico.length > 0 && (
-          <svg className="w-16 h-6 overflow-visible pr-0.5">
-            <polyline
-              fill="none"
-              stroke={estaFuera ? '#f59e0b' : '#10b981'}
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              points={points}
-            />
-          </svg>
-        )}
       </div>
 
     </div>

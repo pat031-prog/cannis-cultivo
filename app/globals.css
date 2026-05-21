@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -43,6 +44,21 @@
   }
 }
 
+@keyframes confetti-fall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(60px) rotate(360deg); opacity: 0; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 :root {
   /* Dark mode por defecto, de nivel premium */
   --background: #090d10; /* Fondo super premium gris-navy muy oscuro */
@@ -83,7 +99,7 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -104,4 +120,23 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+/* Animation utility classes */
+.animate-slide-up { animation: slide-up 0.25s ease-out forwards; }
+.animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
+.animate-confetti { animation: confetti-fall 0.8s ease-in forwards; }
+
+/* Touch target enforcement */
+.touch-target { min-height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; }
+
+/* Snap scroll utility */
+.snap-x-mandatory { scroll-snap-type: x mandatory; }
+.snap-center-child > * { scroll-snap-align: center; }
+
+/* Accessible focus-visible styles */
+*:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+  border-radius: 6px;
 }

@@ -91,7 +91,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <span className="font-bold text-lg tracking-wide bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent">
               CANNIS
             </span>
-            <span className="text-[10px] block text-emerald-500 font-semibold tracking-widest uppercase -mt-1">
+            <span className="hidden sm:block text-[10px] text-emerald-500 font-semibold tracking-widest uppercase -mt-1">
               Cultivo Intelligence
             </span>
           </div>
@@ -183,7 +183,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${isActive ? 'text-emerald-400' : 'text-muted-foreground'}`} />
                     <div>
                       <span>{item.label}</span>
-                      <span className="text-[10px] text-muted-foreground block font-normal leading-tight hidden group-hover:block transition-all">
+                      <span className="text-[10px] text-muted-foreground block font-normal leading-tight mt-0.5">
                         {item.desc}
                       </span>
                     </div>
@@ -205,7 +205,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* 3. CORE PAGE CONTENT */}
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto pb-24 lg:pb-8">
+        <main className="flex-1 p-4 md:p-8 pt-6 md:pt-8 overflow-y-auto pb-24 lg:pb-8">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
@@ -220,7 +220,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all ${
+                className={`relative flex flex-col items-center justify-center min-h-[52px] px-4 rounded-xl transition-all ${
                   isActive 
                     ? 'text-emerald-400 font-semibold' 
                     : 'text-muted-foreground hover:text-foreground'
@@ -228,6 +228,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               >
                 <Icon className={`w-5.5 h-5.5 mb-1 ${isActive ? 'text-emerald-400' : 'text-muted-foreground'}`} />
                 <span className="text-[10px] tracking-tight">{item.label}</span>
+                {isActive && (
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-emerald-500" />
+                )}
               </Link>
             );
           })}
