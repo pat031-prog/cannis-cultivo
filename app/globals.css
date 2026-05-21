@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Colores específicos de fase de cultivo */
+  --color-phase-propagacion: #22c55e; /* Green */
+  --color-phase-vegetativo: #10b981; /* Emerald */
+  --color-phase-prefloracion: #d946ef; /* Fuchsia */
+  --color-phase-floracion: #8b5cf6; /* Violet */
+  --color-phase-lavado: #06b6d4; /* Cyan */
+  --color-phase-secado: #64748b; /* Slate */
+
+  /* Animaciones personalizadas */
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-ring-grow: ring-grow 0.5s ease-out forwards;
+}
+
+@keyframes ring-grow {
+  from {
+    stroke-dashoffset: 283;
+  }
+  to {
+    stroke-dashoffset: var(--dashoffset);
+  }
+}
+
+:root {
+  /* Dark mode por defecto, de nivel premium */
+  --background: #090d10; /* Fondo super premium gris-navy muy oscuro */
+  --foreground: #f1f5f9; /* Texto legible gris claro */
+  
+  --card: #10161d; /* Fondo de tarjetas */
+  --card-foreground: #f1f5f9;
+  
+  --popover: #111822;
+  --popover-foreground: #f1f5f9;
+  
+  --primary: #10b981; /* Verde esmeralda agronómico */
+  --primary-foreground: #022c22;
+  
+  --secondary: #8b5cf6; /* Violeta floración */
+  --secondary-foreground: #ffffff;
+  
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  
+  --accent: #1e293b;
+  --accent-foreground: #f1f5f9;
+  
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #10b981;
+
+  --radius: 0.75rem;
+}
+
+/* Transiciones globales fluidas */
+* {
+  border-color: var(--border);
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) transparent;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(16, 22, 29, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Chrome, Safari and Opera scrollbar hiding */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* IE, Edge and Firefox scrollbar hiding */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
