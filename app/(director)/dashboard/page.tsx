@@ -30,10 +30,10 @@ function calcVPD(temp: number, humidity: number): number {
 }
 
 function vpdColor(vpd: number): string {
-  if (vpd < 0.8) return 'text-[#849d85]';
-  if (vpd <= 1.2) return 'text-[#849d85]';
-  if (vpd <= 1.6) return 'text-[#d4a373]';
-  return 'text-[#d97757]';
+  if (vpd < 0.8) return 'text-[#10b981]';
+  if (vpd <= 1.2) return 'text-[#10b981]';
+  if (vpd <= 1.6) return 'text-[#eab308]';
+  return 'text-[#e00]';
 }
 
 function vpdLabel(vpd: number): string {
@@ -92,9 +92,9 @@ function progressPercent(value: number, min: number, max: number): number {
 
 function LedSemaforo({ estado }: { estado: 'green' | 'amber' | 'red' }) {
   const cfg = {
-    green: { bg: 'bg-[#849d85]' },
-    amber: { bg: 'bg-[#d4a373]' },
-    red:   { bg: 'bg-[#d97757]' },
+    green: { bg: 'bg-[#10b981]' },
+    amber: { bg: 'bg-[#eab308]' },
+    red:   { bg: 'bg-[#e00]' },
   }[estado];
 
   return (
@@ -112,7 +112,7 @@ function SensorChip({
   unit,
   min,
   max,
-  barColor = 'bg-[#849d85]',
+  barColor = 'bg-[#10b981]',
 }: {
   icon: React.ReactNode;
   value: number;
@@ -123,14 +123,14 @@ function SensorChip({
 }) {
   const pct = progressPercent(value, min, max);
   return (
-    <div className="flex-1 min-w-0 bg-[#323130] ring-1 ring-inset ring-white/5 rounded-xl p-2.5 flex flex-col gap-1.5 min-h-[44px] shadow-sm shadow-black/40">
+    <div className="flex-1 min-w-0 bg-[#0a0a0a] border border-[#222] rounded-xl p-2.5 flex flex-col gap-1.5 min-h-[44px]">
       <div className="flex items-center gap-1">
         {icon}
-        <span className="font-bold text-sm text-[#e0deda] leading-none">{value.toFixed(1)}</span>
-        <span className="text-[10px] text-[#a3a19e] leading-none">{unit}</span>
+        <span className="font-bold text-sm text-[#ededed] leading-none">{value.toFixed(1)}</span>
+        <span className="text-[10px] text-[#888] leading-none">{unit}</span>
       </div>
       {/* progress bar */}
-      <div className="h-1 w-full rounded-full bg-[#3d3a35]">
+      <div className="h-1 w-full rounded-full bg-[#222]">
         <div
           className={`h-1 rounded-full transition-all duration-700 ${barColor}`}
           style={{ width: `${pct}%` }}
@@ -156,14 +156,14 @@ function CarpaCard({ carpa }: { carpa: any }) {
   // Card border based on semáforo state
   const ringClass =
     estadoSemaforo === 'red'
-      ? 'ring-[#d97757]/40'
+      ? 'border-[#e00]/40'
       : estadoSemaforo === 'amber'
-      ? 'ring-[#d4a373]/30'
-      : 'ring-white/5 hover:ring-[#849d85]/30';
+      ? 'border-[#eab308]/40'
+      : 'border-[#222] hover:border-[#10b981]/40';
 
   // Sparkline stroke color
   const sparkStroke =
-    estadoSemaforo === 'red' ? '#d97757' : estadoSemaforo === 'amber' ? '#d4a373' : '#849d85';
+    estadoSemaforo === 'red' ? '#e00' : estadoSemaforo === 'amber' ? '#eab308' : '#10b981';
 
   const { setSelectedLoteId } = useAppContext();
 
@@ -172,8 +172,8 @@ function CarpaCard({ carpa }: { carpa: any }) {
       className={`
         snap-center min-w-[280px] flex-shrink-0
         md:min-w-0 md:flex-shrink
-        bg-[#2a2928] ring-1 ring-inset rounded-2xl p-8 flex flex-col min-h-[280px]
-        relative overflow-hidden group transition-all shadow-sm shadow-black/40
+        bg-[#0a0a0a] border rounded-xl p-6 flex flex-col min-h-[280px]
+        relative overflow-hidden group transition-all
         ${ringClass}
       `}
     >
@@ -181,10 +181,10 @@ function CarpaCard({ carpa }: { carpa: any }) {
       <div
         className={`absolute top-0 left-0 right-0 h-[2px] ${
           estadoSemaforo === 'red'
-            ? 'bg-[#d97757]'
+            ? 'bg-[#e00]'
             : estadoSemaforo === 'amber'
-            ? 'bg-[#d4a373]'
-            : 'bg-[#849d85]'
+            ? 'bg-[#eab308]'
+            : 'bg-[#10b981]'
         }`}
       />
 
@@ -192,18 +192,18 @@ function CarpaCard({ carpa }: { carpa: any }) {
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="space-y-0.5 min-w-0">
           <div className="flex items-center gap-1.5">
-            <MapPin className="w-3 h-3 text-[#849d85] shrink-0" />
-            <span className="font-serif text-xs tracking-wide text-[#e0deda] truncate">
+            <MapPin className="w-3 h-3 text-[#10b981] shrink-0" />
+            <span className="text-xs tracking-wide text-[#ededed] truncate">
               {ubicacion?.posicion}
             </span>
-            <span className="text-[10px] text-[#a3a19e] shrink-0 font-serif">
+            <span className="text-[10px] text-[#888] shrink-0">
               ({ubicacion?.sala})
             </span>
           </div>
-          <h3 className="font-serif text-lg font-medium text-[#e0deda] group-hover:text-[#849d85] transition-colors leading-tight truncate">
+          <h3 className="text-lg font-medium text-[#ededed] group-hover:text-[#10b981] transition-colors leading-tight truncate">
             {genetica?.nombre ?? 'Sin genética'}
           </h3>
-          <span className="text-[10px] text-[#a3a19e] block font-serif">
+          <span className="text-[10px] text-[#888] block">
             Lote: <b>{lote.codigo}</b> · Sem <b>{semana}</b> D<b>{dia}</b> · {fase}
           </span>
         </div>
@@ -212,12 +212,12 @@ function CarpaCard({ carpa }: { carpa: any }) {
         <div className="flex flex-col items-center gap-1 shrink-0">
           <LedSemaforo estado={estadoSemaforo} />
           <span
-            className={`text-[9px] font-serif px-1.5 py-0.5 rounded-full border ${
+            className={`text-[9px] px-1.5 py-0.5 rounded-full border ${
               estadoSemaforo === 'red'
-                ? 'bg-[#d97757]/10 text-[#d97757] border-[#d97757]/20'
+                ? 'bg-[#e00]/10 text-[#e00] border-[#e00]/20'
                 : estadoSemaforo === 'amber'
-                ? 'bg-[#d4a373]/10 text-[#d4a373] border-[#d4a373]/20'
-                : 'bg-[#849d85]/10 text-[#849d85] border-[#849d85]/20'
+                ? 'bg-[#eab308]/10 text-[#eab308] border-[#eab308]/20'
+                : 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/20'
             }`}
           >
             {estadoSemaforo === 'red' ? 'ALERTA' : estadoSemaforo === 'amber' ? 'DESVÍO' : 'OK'}
@@ -226,52 +226,52 @@ function CarpaCard({ carpa }: { carpa: any }) {
       </div>
 
       {/* ── VPD HERO METRIC ── */}
-      <div className="flex flex-col items-center justify-center py-5 border-y border-[#3d3a35] mb-4">
-        <span className="text-xs font-serif text-[#a3a19e] uppercase tracking-widest mb-1">
+      <div className="flex flex-col items-center justify-center py-4 border-y border-[#222] mb-4">
+        <span className="text-xs text-[#888] uppercase tracking-widest mb-1">
           VPD
         </span>
         <span
-          className={`text-6xl font-serif font-medium tracking-tighter leading-none tabular-nums ${vpdColor(vpd)}`}
+          className={`text-5xl font-sans font-medium tracking-tighter tabular-nums leading-none ${vpdColor(vpd)}`}
         >
           {vpd.toFixed(2)}
         </span>
-        <span className="text-sm font-serif text-[#a3a19e] mt-2 tracking-wide">
+        <span className="text-sm text-[#888] mt-2 tracking-wide">
           0.8 - 1.2 kPa
         </span>
       </div>
 
       {/* ── SENSOR SUB-METRICS (3 chips) ── */}
-      <div className="flex gap-6 mb-4">
+      <div className="flex gap-4 mb-4">
         {/* Temperature chip */}
         <SensorChip
-          icon={<Thermometer className="w-3 h-3 text-[#d4a373] shrink-0" />}
+          icon={<Thermometer className="w-3 h-3 text-[#eab308] shrink-0" />}
           value={temp}
           unit="°C"
           min={15}
           max={35}
           barColor={
-            Math.abs(temp - sensores.temp.esperado) >= 3 ? 'bg-[#d4a373]' : 'bg-[#849d85]'
+            Math.abs(temp - sensores.temp.esperado) >= 3 ? 'bg-[#eab308]' : 'bg-[#10b981]'
           }
         />
         {/* Humidity chip */}
         <SensorChip
-          icon={<Droplet className="w-3 h-3 text-[#d4a373] shrink-0" />}
+          icon={<Droplet className="w-3 h-3 text-[#eab308] shrink-0" />}
           value={humidity}
           unit="%"
           min={30}
           max={90}
           barColor={
-            Math.abs(humidity - sensores.humedad.esperado) >= 10 ? 'bg-[#d4a373]' : 'bg-[#849d85]'
+            Math.abs(humidity - sensores.humedad.esperado) >= 10 ? 'bg-[#eab308]' : 'bg-[#10b981]'
           }
         />
         {/* CO2 / Luz chip (static) */}
         <SensorChip
-          icon={<Sun className="w-3 h-3 text-[#849d85] shrink-0" />}
+          icon={<Sun className="w-3 h-3 text-[#10b981] shrink-0" />}
           value={420}
           unit="ppm"
           min={300}
           max={1200}
-          barColor="bg-[#849d85]"
+          barColor="bg-[#10b981]"
         />
       </div>
 
@@ -305,20 +305,20 @@ function CarpaCard({ carpa }: { carpa: any }) {
           })()}
         </svg>
         <div className="flex justify-between mt-1 px-1">
-          <span className="text-[10px] text-[#a3a19e] font-serif">Historial temp.</span>
-          <span className="text-[10px] text-[#a3a19e] font-serif">{temp.toFixed(1)}°C ahora</span>
+          <span className="text-[10px] text-[#888]">Historial temp.</span>
+          <span className="text-[10px] text-[#888]">{temp.toFixed(1)}°C ahora</span>
         </div>
       </div>
 
       {/* ── FOOTER: desvíos + link ── */}
-      <div className="mt-auto border-t border-[#3d3a35] pt-3 flex justify-between items-center">
-        <span className="text-[10px] text-[#a3a19e] font-serif">
+      <div className="mt-auto border-t border-[#222] pt-3 flex justify-between items-center">
+        <span className="text-[10px] text-[#888]">
           {totalDesvios} desvíos en ciclo
         </span>
         <Link
           href="/informe"
           onClick={() => setSelectedLoteId(lote.id)}
-          className="text-xs font-serif font-medium text-[#849d85] hover:text-[#9bb39c] flex items-center gap-1 group/btn min-h-[44px]"
+          className="text-xs font-sans font-medium tracking-tight font-medium text-[#849d85] hover:text-[#9bb39c] flex items-center gap-1 group/btn min-h-[44px]"
         >
           <span>Ver Informe</span>
           <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
@@ -476,7 +476,7 @@ export default function DirectorDashboardPage() {
 
       {/* 2. FORMULARIO MODAL SIMULADO: LANZAR NUEVO LOTE */}
       {showLaunchForm && (
-        <div className="bg-[#10161d] border border-emerald-500/30 p-6 rounded-2xl shadow-xl space-y-4 animate-ring-grow relative overflow-hidden">
+        <div className="bg-[#10161d] border border-emerald-500/30 p-6 rounded-lg shadow-xl space-y-4 animate-ring-grow relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400" />
           
           <div className="flex justify-between items-center pb-2 border-b border-[#1e293b]">
@@ -584,7 +584,7 @@ export default function DirectorDashboardPage() {
             <CarpaCard key={carpa.lote.id} carpa={carpa} />
           ))}
           {carpasData.length === 0 && (
-            <div className="min-w-[280px] snap-center flex items-center justify-center p-8 bg-[#10161d] border border-dashed border-[#1e293b] rounded-2xl text-muted-foreground text-xs text-center">
+            <div className="min-w-[280px] snap-center flex items-center justify-center p-6 bg-[#0a0a0a] border border-dashed border-[#222] rounded-xl text-[#888] text-xs text-center">
               No hay carpas activas.
             </div>
           )}
@@ -607,7 +607,7 @@ export default function DirectorDashboardPage() {
       </div>
 
       {/* 4. PANEL INFERIOR: FEED DE DESVÍOS */}
-      <div className="bg-[#10161d] border border-[#1e293b] p-6 rounded-2xl space-y-4">
+      <div className="bg-[#10161d] border border-[#1e293b] p-6 rounded-lg space-y-4">
         <div className="flex items-center justify-between border-b border-[#1e293b] pb-3">
           <div>
             <h3 className="font-extrabold text-base text-foreground flex items-center gap-2">

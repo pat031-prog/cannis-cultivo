@@ -69,7 +69,7 @@ function StepBtn({
     <button
       type="button"
       onClick={onClick}
-      className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-2xl bg-[#3a3938] text-[#e0e0e0] font-bold text-base flex items-center justify-center transition-colors hover:bg-[#849d85] hover:text-[#2a2928]"
+      className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-lg bg-[#222] text-[#ededed] font-bold text-base flex items-center justify-center transition-colors hover:bg-[#849d85] hover:text-[#2a2928]"
     >
       {children}
     </button>
@@ -362,7 +362,7 @@ export default function ModoHoyPage() {
             completar tus tareas.
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-[#2a2928] border border-[#3a3938] rounded-2xl px-3 py-1.5 text-xs text-muted-foreground self-start">
+        <div className="flex items-center gap-2 bg-[#0a0a0a] border border-[#222] rounded-lg px-3 py-1.5 text-xs text-muted-foreground self-start">
           <Calendar className="w-4 h-4 text-[#849d85]" />
           <span>
             Jornada simulada: <b>21 de Mayo, 2026</b>
@@ -387,44 +387,18 @@ export default function ModoHoyPage() {
                 setSelectedLote(status.lote);
                 setExpandedTask(null);
               }}
-              className={`snap-center min-w-[200px] md:min-w-0 min-h-[160px] p-6 rounded-3xl ring-1 ring-inset shadow-sm shadow-black/40 transition-all text-left flex flex-col items-center gap-6 relative overflow-hidden ${
+              className={`snap-center min-w-[200px] md:min-w-0 min-h-[160px] p-6 rounded-xl ring-1 ring-inset shadow-sm shadow-black/40 transition-all text-left flex flex-col items-center gap-6 relative overflow-hidden ${
                 isSelected
-                  ? 'bg-[#2a2928] ring-[#849d85]'
-                  : 'bg-[#2a2928] ring-white/5 hover:ring-[#849d85]/50'
+                  ? 'bg-[#0a0a0a] ring-[#849d85]'
+                  : 'bg-[#0a0a0a] ring-white/5 hover:ring-[#849d85]/50'
               }`}
             >
               {/* Progress ring — centred, 80×80 */}
               <div className="relative flex items-center justify-center">
-                <svg
-                  viewBox="0 0 100 100"
-                  width="100"
-                  height="100"
-                  className="transform -rotate-90"
-                >
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r={radius}
-                    stroke="#1e293b"
-                    strokeWidth="4"
-                    fill="transparent"
-                  />
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r={radius}
-                    stroke="#10b981"
-                    strokeWidth="4"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={strokeDashoffset}
-                    strokeLinecap="round"
-                    fill="transparent"
-                    style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-                  />
-                </svg>
+                <div className="w-full h-1 bg-[#222] rounded-full overflow-hidden mt-4"><div className="h-full bg-primary transition-all" style={{ width: `${status.porcentaje}%` }} /></div>
                 {/* Inner text */}
                 <div className="absolute flex flex-col items-center justify-center">
-                  <span className="text-3xl font-serif text-[#e0e0e0] font-medium tracking-tight">
+                  <span className="text-3xl font-sans font-medium tracking-tight text-[#ededed] font-medium tracking-tight">
                     {status.porcentaje}%
                   </span>
                   <span className="text-[9px] text-muted-foreground leading-tight">
@@ -469,17 +443,17 @@ export default function ModoHoyPage() {
 
             {/* Celebration / progress card */}
             {selectedStatus.porcentaje === 100 ? (
-              <div className="flex flex-col items-center justify-center bg-[#2a2928] border border-[#3a3938] p-8 rounded-3xl text-center space-y-4 shadow-none min-h-[180px] animate-in fade-in duration-1000">
+              <div className="flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#222] p-8 rounded-xl text-center space-y-4 shadow-none min-h-[180px] animate-in fade-in duration-1000">
                 <CheckCircle2 className="w-12 h-12 text-[#849d85] mb-2" strokeWidth={1.5} />
-                <h3 className="font-serif text-3xl text-[#e0e0e0]">
+                <h3 className="font-sans font-medium tracking-tight text-3xl text-[#ededed]">
                   Día completado
                 </h3>
-                <p className="text-sm text-[#e0e0e0]/70 font-sans">
+                <p className="text-sm text-[#ededed]/70 font-sans">
                   Todas las tareas en {selectedStatus.ubicacion} están listas.
                 </p>
               </div>
             ) : (
-              <div className="bg-[#2a2928] border border-[#3a3938] p-6 rounded-2xl text-center space-y-4">
+              <div className="bg-[#0a0a0a] border border-[#222] p-6 rounded-lg text-center space-y-4">
                 <div className="w-12 h-12 rounded-full bg-[#849d85]/5 border border-[#849d85]/10 flex items-center justify-center mx-auto text-[#849d85]">
                   <ClipboardList className="w-6 h-6" />
                 </div>
@@ -493,7 +467,7 @@ export default function ModoHoyPage() {
                     tareas para completar la jornada.
                   </p>
                 </div>
-                <div className="w-full bg-[#3a3938] rounded-full h-1.5">
+                <div className="w-full bg-[#222] rounded-full h-1.5">
                   <div
                     className="bg-[#849d85] h-1.5 rounded-full transition-all duration-500"
                     style={{ width: `${selectedStatus.porcentaje}%` }}
@@ -507,8 +481,8 @@ export default function ModoHoyPage() {
             )}
 
             {/* Precintos */}
-            <div className="bg-[#2a2928] border border-[#3a3938] p-4 rounded-3xl space-y-3">
-              <h3 className="font-bold text-sm text-foreground flex items-center gap-1.5 border-b border-[#3a3938] pb-2">
+            <div className="bg-[#0a0a0a] border border-[#222] p-4 rounded-xl space-y-3">
+              <h3 className="font-bold text-sm text-foreground flex items-center gap-1.5 border-b border-[#222] pb-2">
                 <Layers className="w-4 h-4 text-[#849d85]" />
                 Plantas &amp; Precintos (
                 {
@@ -530,7 +504,7 @@ export default function ModoHoyPage() {
                   .map((p) => (
                     <div
                       key={p.id}
-                      className="bg-[#1a1918] border border-[#3a3938]/70 p-2 rounded-2xl flex items-center justify-between text-xs hover:border-[#10b981]/20 transition-all"
+                      className="bg-[#1a1918] border border-[#222]/70 p-2 rounded-lg flex items-center justify-between text-xs hover:border-[#10b981]/20 transition-all"
                     >
                       <div className="flex items-center gap-2">
                         <div
@@ -548,7 +522,7 @@ export default function ModoHoyPage() {
                           {p.codigo_completo}
                         </span>
                       </div>
-                      <span className="text-[10px] text-muted-foreground uppercase bg-[#2a2928] px-2 py-0.5 rounded font-bold">
+                      <span className="text-[10px] text-muted-foreground uppercase bg-[#0a0a0a] px-2 py-0.5 rounded font-bold">
                         {p.estado === 'activo' ? 'viva' : p.estado}
                       </span>
                     </div>
@@ -557,7 +531,7 @@ export default function ModoHoyPage() {
             </div>
 
             {/* Extra action card */}
-            <div className="bg-[#2a2928] border border-[#3a3938] p-4 rounded-3xl space-y-3">
+            <div className="bg-[#0a0a0a] border border-[#222] p-4 rounded-xl space-y-3">
               <h3 className="font-bold text-sm text-foreground flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-[#849d85]" />
                 Registrar Acción Extra
@@ -569,7 +543,7 @@ export default function ModoHoyPage() {
 
               {/* Success banner */}
               {successBanner && (
-                <div className="flex items-center gap-2 bg-[#849d85]/10 text-emerald-400 border border-[#849d85]/30 rounded-2xl px-3 py-2 text-xs font-semibold animate-pulse">
+                <div className="flex items-center gap-2 bg-[#849d85]/10 text-emerald-400 border border-[#849d85]/30 rounded-lg px-3 py-2 text-xs font-semibold animate-pulse">
                   <CheckCircle2 className="w-4 h-4" />
                   ¡Acción extra registrada con éxito!
                 </div>
@@ -579,7 +553,7 @@ export default function ModoHoyPage() {
                 <button
                   type="button"
                   onClick={() => setShowExtraForm(true)}
-                  className="w-full min-h-[44px] py-2 bg-[#849d85]/10 hover:bg-[#849d85]/20 text-emerald-400 border border-[#849d85]/20 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                  className="w-full min-h-[44px] py-2 bg-[#849d85]/10 hover:bg-[#849d85]/20 text-emerald-400 border border-[#849d85]/20 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5"
                 >
                   <Plus className="w-4 h-4" />
                   Agregar Labor Extra
@@ -593,7 +567,7 @@ export default function ModoHoyPage() {
                     <select
                       value={extraTipo}
                       onChange={(e) => setExtraTipo(e.target.value)}
-                      className="w-full mt-1 bg-[#1a1918] border border-[#3a3938] text-sm text-foreground rounded-2xl px-3 py-2 focus:outline-none focus:border-[#849d85] min-h-[44px]"
+                      className="w-full mt-1 bg-[#1a1918] border border-[#222] text-sm text-foreground rounded-lg px-3 py-2 focus:outline-none focus:border-[#849d85] min-h-[44px]"
                     >
                       <option value="poda">Poda</option>
                       <option value="defoliacion">Defoliación</option>
@@ -612,14 +586,14 @@ export default function ModoHoyPage() {
                       onChange={(e) => setExtraNotas(e.target.value)}
                       rows={3}
                       placeholder="Describe la acción realizada..."
-                      className="w-full mt-1 bg-[#1a1918] border border-[#3a3938] text-sm text-foreground rounded-2xl px-3 py-2 focus:outline-none focus:border-[#849d85] resize-none"
+                      className="w-full mt-1 bg-[#1a1918] border border-[#222] text-sm text-foreground rounded-lg px-3 py-2 focus:outline-none focus:border-[#849d85] resize-none"
                     />
                   </div>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={registrarAccionExtra}
-                      className="flex-1 min-h-[44px] bg-[#849d85]/20 hover:bg-[#849d85]/30 text-emerald-400 border border-[#849d85]/30 rounded-2xl text-xs font-bold transition-all"
+                      className="flex-1 min-h-[44px] bg-[#849d85]/20 hover:bg-[#849d85]/30 text-emerald-400 border border-[#849d85]/30 rounded-lg text-xs font-bold transition-all"
                     >
                       Confirmar
                     </button>
@@ -629,7 +603,7 @@ export default function ModoHoyPage() {
                         setShowExtraForm(false);
                         setExtraNotas('');
                       }}
-                      className="flex-1 min-h-[44px] bg-[#1a1918] hover:bg-[#1a232d] text-muted-foreground border border-[#3a3938] rounded-2xl text-xs font-bold transition-all"
+                      className="flex-1 min-h-[44px] bg-[#1a1918] hover:bg-[#1a232d] text-muted-foreground border border-[#222] rounded-lg text-xs font-bold transition-all"
                     >
                       Cancelar
                     </button>
@@ -643,7 +617,7 @@ export default function ModoHoyPage() {
           <div className="lg:col-span-2 space-y-4 order-last lg:order-first">
 
             {/* Checklist header */}
-            <div className="bg-[#2a2928] border border-[#3a3938] p-4 rounded-3xl flex items-center justify-between">
+            <div className="bg-[#0a0a0a] border border-[#222] p-4 rounded-xl flex items-center justify-between">
               <div>
                 <span className="text-xs text-[#849d85] font-bold uppercase tracking-wider">
                   Lote Activo
@@ -656,12 +630,12 @@ export default function ModoHoyPage() {
                 </p>
               </div>
               {selectedStatus.porcentaje === 100 ? (
-                <div className="flex items-center gap-1.5 bg-[#849d85]/10 text-emerald-400 border border-[#849d85]/30 px-3 py-1.5 rounded-2xl text-xs font-bold">
+                <div className="flex items-center gap-1.5 bg-[#849d85]/10 text-emerald-400 border border-[#849d85]/30 px-3 py-1.5 rounded-lg text-xs font-bold">
                   <Sparkles className="w-4 h-4" />
                   Cerrado para hoy
                 </div>
               ) : (
-                <div className="text-xs text-muted-foreground bg-[#1a1918] border border-[#3a3938] px-3 py-1.5 rounded-2xl">
+                <div className="text-xs text-muted-foreground bg-[#1a1918] border border-[#222] px-3 py-1.5 rounded-lg">
                   Progreso:{' '}
                   <b>
                     {selectedStatus.completadas} de {selectedStatus.totalTareas}
@@ -672,7 +646,7 @@ export default function ModoHoyPage() {
 
             {/* Photo success banner */}
             {photoSuccess && (
-              <div className="flex items-center gap-2 bg-[#849d85]/10 text-emerald-400 border border-[#849d85]/30 rounded-3xl px-4 py-2.5 text-xs font-semibold">
+              <div className="flex items-center gap-2 bg-[#849d85]/10 text-emerald-400 border border-[#849d85]/30 rounded-xl px-4 py-2.5 text-xs font-semibold">
                 <Camera className="w-4 h-4" />
                 Foto del espécimen capturada con éxito.
               </div>
@@ -738,18 +712,18 @@ export default function ModoHoyPage() {
                 return (
                   <div
                     key={acc.id}
-                    className={`border border-l-4 rounded-3xl transition-all ${borderColor} ${
+                    className={`border border-l-4 rounded-xl transition-all ${borderColor} ${
                       acc.hecha
-                        ? 'bg-[#2a2928]/60 border-[#3a3938]'
-                        : 'bg-[#2a2928] border-[#3a3938] hover:border-[#10b981]/20'
+                        ? 'bg-[#0a0a0a]/60 border-[#222]'
+                        : 'bg-[#0a0a0a] border-[#222] hover:border-[#10b981]/20'
                     } ${hayDesvios && acc.hecha ? 'border-amber-500/30 bg-amber-500/[0.02]' : ''}`}
                   >
                     {/* Main row */}
-                    <div className="px-4 flex items-center gap-3 min-h-[56px]">
+                    <div className="px-4 flex items-center gap-3 min-h-[44px]">
 
                       {/* Type icon — left */}
                       <div
-                        className={`w-8 h-8 rounded-2xl flex items-center justify-center shrink-0 ${iconBg}`}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${iconBg}`}
                       >
                         {TASK_ICON[tipoKey] ?? (
                           <ClipboardList className="w-4 h-4" />
@@ -797,7 +771,7 @@ export default function ModoHoyPage() {
                         {/* Photo thumbnail */}
                         {acc.foto_url && (
                           <div className="pt-1.5">
-                            <div className="relative w-20 h-12 rounded-md overflow-hidden border border-[#3a3938]">
+                            <div className="relative w-20 h-12 rounded-md overflow-hidden border border-[#222]">
                               <img
                                 src={acc.foto_url}
                                 alt="Foto espécimen"
@@ -812,7 +786,7 @@ export default function ModoHoyPage() {
                       <button
                         type="button"
                         onClick={() => subirFoto(index)}
-                        className="min-w-[44px] min-h-[44px] p-2 rounded-2xl border border-[#3a3938] hover:bg-[#1a232d] hover:border-[#849d85]/30 transition-all text-muted-foreground hover:text-[#849d85] flex items-center justify-center"
+                        className="min-w-[44px] min-h-[44px] p-2 rounded-lg border border-[#222] hover:bg-[#1a232d] hover:border-[#849d85]/30 transition-all text-muted-foreground hover:text-[#849d85] flex items-center justify-center"
                         title="Subir foto de planta"
                       >
                         <Camera className="w-4 h-4" />
@@ -825,7 +799,7 @@ export default function ModoHoyPage() {
                           onClick={() =>
                             setExpandedTask(isExpanded ? null : index)
                           }
-                          className="min-w-[44px] min-h-[44px] p-2 rounded-2xl border border-[#3a3938] hover:bg-[#1a232d] transition-all text-muted-foreground hover:text-foreground flex items-center justify-center"
+                          className="min-w-[44px] min-h-[44px] p-2 rounded-lg border border-[#222] hover:bg-[#1a232d] transition-all text-muted-foreground hover:text-foreground flex items-center justify-center"
                           title="Expandir parámetros"
                         >
                           {isExpanded ? (
@@ -847,14 +821,14 @@ export default function ModoHoyPage() {
                             <CheckCircle2 className="w-5 h-5 text-[#2a2928]" />
                           </div>
                         ) : (
-                          <div className="w-8 h-8 rounded-full border-2 border-[#3a3938] bg-[#2a2928] flex items-center justify-center hover:border-[#849d85]/50 transition-all" />
+                          <div className="w-8 h-8 rounded-full border-2 border-[#222] bg-[#0a0a0a] flex items-center justify-center hover:border-[#849d85]/50 transition-all" />
                         )}
                       </button>
                     </div>
 
                     {/* ── Expandable parameter controls ── */}
                     {isExpanded && hasParams && (
-                      <div className="border-t border-[#3a3938]/50 px-4 py-4 bg-[#0a0f14] rounded-b-xl">
+                      <div className="border-t border-[#222]/50 px-4 py-4 bg-[#0a0f14] rounded-b-xl">
                         {(pact.tipo === 'riego' ||
                           pact.tipo === 'fertilizacion') && (
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -869,7 +843,7 @@ export default function ModoHoyPage() {
                                   </span>
                                 )}
                               </label>
-                              <div className="flex items-center gap-1.5 bg-[#2a2928] border border-[#3a3938] rounded-2xl p-1.5">
+                              <div className="flex items-center gap-1.5 bg-[#0a0a0a] border border-[#222] rounded-lg p-1.5">
                                 <StepBtn
                                   onClick={() =>
                                     cambiarParametro(
@@ -930,7 +904,7 @@ export default function ModoHoyPage() {
                                   </span>
                                 )}
                               </label>
-                              <div className="flex items-center gap-1.5 bg-[#2a2928] border border-[#3a3938] rounded-2xl p-1.5">
+                              <div className="flex items-center gap-1.5 bg-[#0a0a0a] border border-[#222] rounded-lg p-1.5">
                                 <StepBtn
                                   onClick={() =>
                                     cambiarParametro(
@@ -994,7 +968,7 @@ export default function ModoHoyPage() {
                                   </span>
                                 )}
                               </label>
-                              <div className="flex items-center gap-1.5 bg-[#2a2928] border border-[#3a3938] rounded-2xl p-1.5">
+                              <div className="flex items-center gap-1.5 bg-[#0a0a0a] border border-[#222] rounded-lg p-1.5">
                                 <StepBtn
                                   onClick={() =>
                                     cambiarParametro(
@@ -1069,7 +1043,7 @@ export default function ModoHoyPage() {
                                     Number(e.target.value),
                                   )
                                 }
-                                className="w-full min-h-[44px] bg-[#2a2928] border border-[#3a3938] text-sm font-bold text-foreground rounded-2xl px-3 py-1.5 focus:outline-none focus:border-[#849d85]"
+                                className="w-full min-h-[44px] bg-[#0a0a0a] border border-[#222] text-sm font-bold text-foreground rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#849d85]"
                               />
                             </div>
                             <div className="space-y-1.5">
@@ -1086,7 +1060,7 @@ export default function ModoHoyPage() {
                                     Number(e.target.value),
                                   )
                                 }
-                                className="w-full min-h-[44px] bg-[#2a2928] border border-[#3a3938] text-sm font-bold text-foreground rounded-2xl px-3 py-1.5 focus:outline-none focus:border-[#849d85]"
+                                className="w-full min-h-[44px] bg-[#0a0a0a] border border-[#222] text-sm font-bold text-foreground rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#849d85]"
                               />
                             </div>
                           </div>

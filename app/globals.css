@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -22,15 +22,15 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Colores específicos de fase de cultivo (Botanical) */
-  --color-phase-propagacion: #849d85;
-  --color-phase-vegetativo: #849d85;
-  --color-phase-prefloracion: #9d8a9f;
-  --color-phase-floracion: #9d8a9f;
-  --color-phase-lavado: #7aa2a6;
-  --color-phase-secado: #8a8987;
-  --color-phase-warning: #d4a373;
-  --color-phase-danger: #d97757;
+  /* Neon/Technical Phase colors */
+  --color-phase-propagacion: #22c55e;
+  --color-phase-vegetativo: #10b981;
+  --color-phase-prefloracion: #d946ef;
+  --color-phase-floracion: #8b5cf6;
+  --color-phase-lavado: #06b6d4;
+  --color-phase-secado: #64748b;
+  --color-phase-warning: #f5a623;
+  --color-phase-danger: #ef4444;
 }
 
 @keyframes slide-up {
@@ -44,33 +44,33 @@
 }
 
 :root {
-  /* Editorial Botanical Theme */
-  --background: #1f1e1d;
-  --foreground: #f4f1ea;
+  /* Vercel / Linear Hyper-technical Aesthetic */
+  --background: #000000;
+  --foreground: #ededed;
   
-  --card: #2a2928;
-  --card-foreground: #f4f1ea;
+  --card: #0a0a0a;
+  --card-foreground: #ededed;
   
-  --popover: #2a2928;
-  --popover-foreground: #f4f1ea;
+  --popover: #0a0a0a;
+  --popover-foreground: #ededed;
   
-  --primary: #849d85; /* Sage green */
-  --primary-foreground: #1f1e1d;
+  --primary: #10b981;
+  --primary-foreground: #000000;
   
-  --secondary: #9d8a9f; /* Ash lavender */
-  --secondary-foreground: #1f1e1d;
+  --secondary: #0070f3;
+  --secondary-foreground: #ffffff;
   
-  --muted: #3a3938;
-  --muted-foreground: #a3a19e;
+  --muted: #1a1a1a;
+  --muted-foreground: #888888;
   
-  --accent: #3a3938;
-  --accent-foreground: #f4f1ea;
+  --accent: #1a1a1a;
+  --accent-foreground: #ededed;
   
-  --border: #3a3938;
-  --input: #3a3938;
-  --ring: #849d85;
+  --border: #222222;
+  --input: #222222;
+  --ring: #10b981;
 
-  --radius: 0.5rem; /* Slightly less rounded for a bookish feel */
+  --radius: 0.5rem;
 }
 
 /* Transiciones globales fluidas */
@@ -85,12 +85,8 @@
     background-color: var(--background);
     font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
     overflow-x: hidden;
-    @apply antialiased text-[#e8e4dc];
+    @apply antialiased text-[#ededed];
   }
-}
-
-.font-serif {
-  font-family: 'Playfair Display', serif;
 }
 
 /* Chrome, Safari and Opera scrollbar hiding */
@@ -116,22 +112,7 @@
 
 /* Accessible focus-visible styles */
 *:focus-visible {
-  outline: 2px solid #849d85;
+  outline: 2px solid #10b981;
   outline-offset: 2px;
   border-radius: 6px;
-}
-
-@layer utilities {
-  .bg-noise {
-    position: relative;
-  }
-  .bg-noise::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    opacity: 0.03;
-    pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    z-index: 50;
-  }
 }

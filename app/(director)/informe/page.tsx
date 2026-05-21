@@ -5,15 +5,10 @@ import { useAppContext } from '@/lib/context/AppContext';
 import { mockDb, Lote, RegistroDiario, RegistroAccion } from '@/lib/supabase/mockDb';
 import { AnalisisDesvio } from '@/lib/desvios/calculadora';
 import { 
-  LineChart as ChartIcon,
-  Calendar,
-  AlertTriangle,
-  CheckCircle2,
   Droplet,
-  Thermometer,
   Sliders,
-  ArrowRight,
-  AlertCircle
+  Activity,
+  Terminal
 } from 'lucide-react';
 
 // ─── TIPOS ───────────────────────────────────────────────────────────────────
@@ -23,11 +18,11 @@ type FiltroChip = 'todos' | 'graves' | 'moderados' | 'ph_ec' | 'omitidos';
 // ─── CHIP CONSTANTS ───────────────────────────────────────────────────────────
 
 const CHIPS: { id: FiltroChip; label: string }[] = [
-  { id: 'todos',    label: 'Todos' },
-  { id: 'graves',   label: 'Graves' },
-  { id: 'moderados',label: 'Moderados' },
-  { id: 'ph_ec',    label: 'pH/EC' },
-  { id: 'omitidos', label: 'Omitidos' },
+  { id: 'todos',    label: 'All Events' },
+  { id: 'graves',   label: 'Critical' },
+  { id: 'moderados',label: 'Warnings' },
+  { id: 'ph_ec',    label: 'I/O Desync' },
+  { id: 'omitidos', label: 'Dropped' },
 ];
 
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
@@ -48,6 +43,7 @@ export default function VistaNerdPage() {
   const [chartData, setChartData] = useState<ChartPoint[]>([]);
 
   // Fecha de hoy
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const fechaHoy = new Date().toISOString().slice(0, 10);
 
   const cargarDatosLote = (id: string) => {
@@ -103,7 +99,6 @@ export default function VistaNerdPage() {
 
   // ─── FILTRADO ──────────────────────────────────────────────────────────────
 
-  /** Devuelve los registros del día que pasan el filtro de chip activo */
   const diaPassesFiltro = (fecha: string): boolean => {
     const desviosDia = desvios.filter(d => d.fecha === fecha);
     switch (filtroChip) {
@@ -120,27 +115,27 @@ export default function VistaNerdPage() {
   // ─── JSX ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-10 pb-16 bg-[#121413] text-stone-300 min-h-screen font-sans">
+    <div className="space-y-8 pb-16 bg-black text-neutral-300 min-h-screen font-sans">
       
       {/* ── HEADER ─────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-6 pt-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-6 pt-8 border-b border-[#222] pb-6">
         <div className="max-w-2xl">
-          <h1 className="text-3xl font-serif text-stone-100 flex items-center gap-3">
-            <ChartIcon className="w-6 h-6 text-[#8b9a8a]" strokeWidth={1.5} />
-            Logbook Botánico
+          <h1 className="text-xl font-mono text-neutral-100 flex items-center gap-3">
+            <Terminal className="w-5 h-5 text-neutral-400" strokeWidth={1.5} />
+            ~/audit-log
           </h1>
-          <p className="text-stone-400 text-sm mt-2 font-serif leading-relaxed">
-            Registro editorial de desvíos agronómicos: planificado versus ejecución real en conductividad (EC), acidez (pH) y omisiones de tareas.
+          <p className="text-neutral-500 text-xs mt-2 font-mono">
+            System execution trace: IO synchronization, environmental deltas, and process dropping events.
           </p>
         </div>
 
         {/* Lote Selector */}
-        <div className="flex items-center gap-3 self-start md:self-center bg-[#181a19] p-2 border border-[#2a2d2a]">
-          <span className="text-xs text-stone-500 font-serif uppercase tracking-widest px-2">Lote</span>
+        <div className="flex items-center gap-2 self-start md:self-center bg-[#0a0a0a] border border-[#222]">
+          <span className="text-[10px] text-neutral-500 font-mono uppercase tracking-widest pl-3">Target</span>
           <select
             value={loteId}
             onChange={(e) => setLoteId(e.target.value)}
-            className="text-sm bg-[#121413] border border-[#2a2d2a] text-stone-200 px-3 py-1.5 focus:outline-none focus:border-[#8b9a8a] font-serif"
+            className="text-xs bg-transparent text-neutral-200 px-3 py-1.5 focus:outline-none focus:border-neutral-700 font-mono min-h-[44px] min-w-[44px]"
           >
             {lotes.map(l => {
               const gen = mockDb.geneticas.find(g => g.id === l.plantilla_id || g.id === 'gen-1');
@@ -152,138 +147,109 @@ export default function VistaNerdPage() {
         </div>
       </div>
 
-      {/* ── FILTER CHIPS ────────────────────────────── */}
-      <div className="px-6 border-b border-[#2a2d2a] pb-6">
-        <div className="flex gap-3 flex-wrap">
-          {CHIPS.map(chip => (
-            <button
-              key={chip.id}
-              onClick={() => setFiltroChip(chip.id)}
-              className={`px-4 py-1.5 text-xs font-serif tracking-wide border transition-colors ${
-                filtroChip === chip.id
-                  ? 'bg-[#8b9a8a]/10 border-[#8b9a8a]/40 text-[#8b9a8a]'
-                  : 'bg-transparent border-[#2a2d2a] text-stone-500 hover:text-stone-300 hover:border-[#8b9a8a]/30'
-              }`}
-            >
-              {chip.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {lote && (
-        /* ── MAIN LAYOUT ─────────────────────────────────────────────────── */
-        <div className="px-6 flex flex-col xl:grid xl:grid-cols-12 gap-12 items-start mt-6">
+        <div className="px-6 flex flex-col xl:grid xl:grid-cols-12 gap-8 items-start">
 
           {/* ── LEFT: CHARTS + ENV CARDS (7/12) ──────────────────────── */}
-          <div className="xl:col-span-7 space-y-10 w-full">
+          <div className="xl:col-span-6 space-y-8 w-full">
 
             {/* GRÁFICO 1: pH */}
-            <div className="space-y-6">
-              <div className="flex items-end justify-between border-b border-[#2a2d2a] pb-4">
+            <div className="space-y-4">
+              <div className="flex items-end justify-between">
                 <div>
-                  <h3 className="font-serif text-xl text-stone-200 flex items-center gap-2">
-                    <Droplet className="w-5 h-5 text-[#8b9a8a]" strokeWidth={1.5} />
-                    Acidez de Riego (pH)
+                  <h3 className="font-mono text-sm text-neutral-200 flex items-center gap-2 uppercase tracking-wide">
+                    <Droplet className="w-4 h-4 text-neutral-400" strokeWidth={1.5} />
+                    pH Vector
                   </h3>
-                  <p className="text-xs text-stone-500 font-serif mt-1.5 italic">
-                    Acidez medida por el equipo vs. rango esperado
-                  </p>
                 </div>
-                <div className="flex items-center gap-4 text-[11px] font-mono flex-shrink-0">
+                <div className="flex items-center gap-4 text-[10px] font-mono flex-shrink-0">
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-px bg-[#8b9a8a]" />
-                    <span className="text-[#8b9a8a]">REAL</span>
+                    <div className="w-3 h-px bg-white" />
+                    <span className="text-neutral-200">OUT</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-px bg-[#4a554e] border-b border-dashed border-[#4a554e]" />
-                    <span className="text-stone-500">PLAN</span>
+                    <div className="w-3 h-px bg-neutral-600 border-b border-dashed border-neutral-600" />
+                    <span className="text-neutral-500">REF</span>
                   </div>
                 </div>
               </div>
 
-              <div className="overflow-x-auto bg-[#181a19] border border-[#2a2d2a] p-6">
+              <div className="overflow-x-auto bg-[#0a0a0a] border border-[#222] p-4">
                 {chartData.length > 0 ? (
-                  renderCustomLineChart(chartData, 'ph_plan', 'ph_real', '#4a554e', '#8b9a8a', [5.0, 7.5])
+                  renderCustomLineChart(chartData, 'ph_plan', 'ph_real', '#525252', '#ffffff', [5.0, 7.5])
                 ) : (
-                  <div className="h-48 flex items-center justify-center text-sm font-serif italic text-stone-500">
-                    Registros insuficientes.
+                  <div className="h-32 flex items-center justify-center text-xs font-mono text-neutral-600">
+                    ERR_NO_DATA
                   </div>
                 )}
               </div>
             </div>
 
             {/* GRÁFICO 2: EC */}
-            <div className="space-y-6">
-              <div className="flex items-end justify-between border-b border-[#2a2d2a] pb-4">
+            <div className="space-y-4">
+              <div className="flex items-end justify-between">
                 <div>
-                  <h3 className="font-serif text-xl text-stone-200 flex items-center gap-2">
-                    <Sliders className="w-5 h-5 text-[#d97757]" strokeWidth={1.5} />
-                    Conductividad Eléctrica (EC)
+                  <h3 className="font-mono text-sm text-neutral-200 flex items-center gap-2 uppercase tracking-wide">
+                    <Sliders className="w-4 h-4 text-neutral-400" strokeWidth={1.5} />
+                    EC Vector
                   </h3>
-                  <p className="text-xs text-stone-500 font-serif mt-1.5 italic">
-                    Concentración salina real vs. plan nutricional
-                  </p>
                 </div>
-                <div className="flex items-center gap-4 text-[11px] font-mono flex-shrink-0">
+                <div className="flex items-center gap-4 text-[10px] font-mono flex-shrink-0">
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-px bg-[#d97757]" />
-                    <span className="text-[#d97757]">REAL</span>
+                    <div className="w-3 h-px bg-white" />
+                    <span className="text-neutral-200">OUT</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-px bg-[#4a554e] border-b border-dashed border-[#4a554e]" />
-                    <span className="text-stone-500">PLAN</span>
+                    <div className="w-3 h-px bg-neutral-600 border-b border-dashed border-neutral-600" />
+                    <span className="text-neutral-500">REF</span>
                   </div>
                 </div>
               </div>
 
-              <div className="overflow-x-auto bg-[#181a19] border border-[#2a2d2a] p-6">
+              <div className="overflow-x-auto bg-[#0a0a0a] border border-[#222] p-4">
                 {chartData.length > 0 ? (
-                  renderCustomLineChart(chartData, 'ec_plan', 'ec_real', '#4a554e', '#d97757', [0.5, 3.0])
+                  renderCustomLineChart(chartData, 'ec_plan', 'ec_real', '#525252', '#ffffff', [0.5, 3.0])
                 ) : (
-                  <div className="h-48 flex items-center justify-center text-sm font-serif italic text-stone-500">
-                    Registros insuficientes.
+                  <div className="h-32 flex items-center justify-center text-xs font-mono text-neutral-600">
+                    ERR_NO_DATA
                   </div>
                 )}
               </div>
             </div>
 
             {/* CRUCE DE SENSORES Y ANOMALÍAS */}
-            <div className="space-y-6">
-              <div className="border-b border-[#2a2d2a] pb-4">
-                <h3 className="font-serif text-xl text-stone-200 flex items-center gap-2">
-                  <Thermometer className="w-5 h-5 text-[#c28b33]" strokeWidth={1.5} />
-                  Lecturas Ambientales
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-mono text-sm text-neutral-200 flex items-center gap-2 uppercase tracking-wide">
+                  <Activity className="w-4 h-4 text-neutral-400" strokeWidth={1.5} />
+                  Environment Matrix
                 </h3>
-                <p className="text-xs text-stone-500 font-serif mt-1.5 italic">
-                  Correlación de sensores en sala con fases del logbook.
-                </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="bg-[#181a19] border border-[#2a2d2a] p-5 space-y-3">
-                  <span className="text-xs font-serif uppercase tracking-widest text-stone-500">Temp Máxima</span>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-2xl font-serif text-stone-200">26.8°C</span>
-                    <span className="text-[11px] font-mono text-[#c28b33] bg-[#c28b33]/10 px-2 py-0.5 border border-[#c28b33]/30 flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" /> +1.8°C
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-[#0a0a0a] border border-[#222] p-4 space-y-2">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">Peak Temp</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-mono text-neutral-200">26.8°C</span>
+                    <span className="text-[10px] font-mono text-red-500 border border-[#222] px-1.5 py-0.5">
+                      [Δ +1.8°C]
                     </span>
                   </div>
-                  <span className="text-xs font-serif text-stone-500 block italic">
-                    Carpa 3 (Semana 5 Día 1). Alarma temporal.
+                  <span className="text-[10px] font-mono text-neutral-500 block truncate">
+                    Zone 3 (T+35d) WARN_TEMP
                   </span>
                 </div>
 
-                <div className="bg-[#181a19] border border-[#2a2d2a] p-5 space-y-3">
-                  <span className="text-xs font-serif uppercase tracking-widest text-stone-500">Déficit de Vapor</span>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-2xl font-serif text-[#8b9a8a]">1.12 kPa</span>
-                    <span className="text-[11px] font-mono text-[#8b9a8a] bg-[#8b9a8a]/10 px-2 py-0.5 border border-[#8b9a8a]/30">
-                      ÓPTIMO
+                <div className="bg-[#0a0a0a] border border-[#222] p-4 space-y-2">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">VPD Status</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-mono text-neutral-200">1.12 kPa</span>
+                    <span className="text-[10px] font-mono text-[#10b981] border border-[#222] px-1.5 py-0.5">
+                      [SYNC]
                     </span>
                   </div>
-                  <span className="text-xs font-serif text-stone-500 block italic">
-                    VPD estable en rango de floración (92% de la semana).
+                  <span className="text-[10px] font-mono text-neutral-500 block truncate">
+                    Target range locked (92% uptime)
                   </span>
                 </div>
               </div>
@@ -291,240 +257,158 @@ export default function VistaNerdPage() {
 
           </div>
 
-          {/* ── RIGHT: TIMELINE (5/12) ───────────────────────────────── */}
-          <div className="xl:col-span-5 w-full space-y-6">
+          {/* ── RIGHT: AUDIT LOG (6/12) ───────────────────────────────── */}
+          <div className="xl:col-span-6 w-full space-y-4">
 
-            <div className="flex items-end justify-between border-b border-[#2a2d2a] pb-4">
-              <h3 className="font-serif text-xl text-stone-200 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-[#8b9a8a]" strokeWidth={1.5} />
-                Línea de Tiempo
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <h3 className="font-mono text-sm text-neutral-200 flex items-center gap-2 uppercase tracking-wide">
+                <Terminal className="w-4 h-4 text-neutral-400" strokeWidth={1.5} />
+                Event Trace
               </h3>
-              <span className="text-xs text-stone-500 font-mono">
-                {registrosFiltrados.length} entradas
-              </span>
+              
+              {/* FILTER TABS INLINE */}
+              <div className="flex gap-0.5 bg-[#0a0a0a] border border-[#222] p-0.5 overflow-x-auto no-scrollbar">
+                {CHIPS.map(chip => (
+                  <button
+                    key={chip.id}
+                    onClick={() => setFiltroChip(chip.id)}
+                    className={`px-3 py-1 text-[10px] font-mono uppercase transition-colors min-h-[44px] min-w-[44px] whitespace-nowrap flex-shrink-0 ${
+                      filtroChip === chip.id
+                        ? 'bg-[#222] text-neutral-100'
+                        : 'bg-transparent text-neutral-500 hover:text-neutral-300'
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Scrollable timeline logbook */}
-            <div className="max-h-[800px] overflow-y-auto pr-6 space-y-0 no-scrollbar relative">
-              {registrosFiltrados.slice().reverse().map((rd, rdIndex) => {
-                const lotObj   = lote;
-                const diaCiclo = lotObj ? mockDb.calcularDiaDeCiclo(lotObj.fecha_inicio, rd.fecha) : 1;
-                const sem      = Math.floor((diaCiclo - 1) / 7) + 1;
-                const dia      = ((diaCiclo - 1) % 7) + 1;
+            {/* Dense Data Table */}
+            <div className="border border-[#222] bg-[#0a0a0a] max-h-[700px] overflow-y-auto no-scrollbar">
+              <table className="w-full text-left border-collapse">
+                <thead className="sticky top-0 bg-[#0a0a0a] border-b border-[#222] z-10">
+                  <tr>
+                    <th className="py-2 px-3 text-[10px] font-mono text-neutral-500 uppercase font-normal w-24">Timestamp</th>
+                    <th className="py-2 px-3 text-[10px] font-mono text-neutral-500 uppercase font-normal">Operation</th>
+                    <th className="py-2 px-3 text-[10px] font-mono text-neutral-500 uppercase font-normal text-right">Deltas</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#222]">
+                  {registrosFiltrados.slice().reverse().map((rd) => {
+                    const lotObj   = lote;
+                    const diaCiclo = lotObj ? mockDb.calcularDiaDeCiclo(lotObj.fecha_inicio, rd.fecha) : 1;
 
-                const plan     = mockDb.plantillas.find(p => p.id === lotObj?.plantilla_id);
-                const diaPlan  = plan?.dias?.find(d => d.semana === sem && d.dia === dia);
+                    const desviosDia    = desvios.filter(d => d.fecha === rd.fecha);
+                    const esGrave       = desviosDia.some(d => d.gravedadGeneral === 'grave');
+                    const esModerado    = desviosDia.some(d => d.gravedadGeneral === 'moderada');
+                    const tieneDesvios  = desviosDia.length > 0;
 
-                const desviosDia    = desvios.filter(d => d.fecha === rd.fecha);
-                const esGrave       = desviosDia.some(d => d.gravedadGeneral === 'grave');
-                const esModerado    = desviosDia.some(d => d.gravedadGeneral === 'moderada');
-                const tieneDesvios  = desviosDia.length > 0;
+                    const realRiego = rd.acciones?.find(a =>
+                      a.tipo === 'riego' || a.tipo === 'fertilizacion'
+                    );
 
-                const esHoy = rd.fecha === fechaHoy;
+                    const otrasAcciones = rd.acciones?.filter(ra => ra.tipo !== 'riego' && ra.tipo !== 'fertilizacion') || [];
 
-                const planAcciones = diaPlan?.acciones?.filter(a =>
-                  a.tipo === 'riego' || a.tipo === 'fertilizacion'
-                ) || [];
-                const planPrimario = planAcciones[0] ?? null;
+                    const desvioParams = desviosDia
+                      .filter(d => d.tipoDesvio === 'parametro_distinto')
+                      .flatMap(d => d.desviosCampos)
+                      .filter(dc => dc.campo === 'pH' || dc.campo === 'EC (mS/cm)');
 
-                const realRiego = rd.acciones?.find(a =>
-                  a.tipo === 'riego' || a.tipo === 'fertilizacion'
-                );
-
-                const otrasAcciones = rd.acciones?.filter(ra => ra.tipo !== 'riego' && ra.tipo !== 'fertilizacion') || [];
-
-                const desvioParams = desviosDia
-                  .filter(d => d.tipoDesvio === 'parametro_distinto')
-                  .flatMap(d => d.desviosCampos)
-                  .filter(dc => dc.campo === 'pH' || dc.campo === 'EC (mS/cm)');
-
-                return (
-                  <div key={rd.id} className="relative pl-6 pb-12 border-l border-[#2a2d2a] last:border-0 last:pb-0">
+                    // Determine row indicator color
+                    let indicatorClass = "bg-transparent";
+                    if (esGrave) indicatorClass = "bg-red-500";
+                    else if (esModerado) indicatorClass = "bg-yellow-500";
+                    else if (rd.acciones?.some(a => a.hecha)) indicatorClass = "bg-neutral-500";
                     
-                    {/* Logbook Timeline Node */}
-                    <div className={`absolute -left-[3.5px] top-1.5 w-1.5 h-1.5 rounded-full ${
-                      esGrave    ? 'bg-[#d97757]' :
-                      esModerado ? 'bg-[#c28b33]' :
-                                   'bg-[#8b9a8a]'
-                    }`} />
-
-                    {/* Day header */}
-                    <div className="flex items-baseline gap-3 mb-4">
-                      <span className="text-lg font-serif text-stone-200">
-                        Día {diaCiclo}
-                      </span>
-                      <span className="text-xs text-stone-500 font-mono tracking-wider">
-                        {rd.fecha} · S{sem}D{dia}
-                      </span>
-                      {esHoy && (
-                        <span className="text-[10px] px-1.5 py-0.5 border border-[#8b9a8a]/30 text-[#8b9a8a] font-serif uppercase tracking-widest">
-                          Hoy
-                        </span>
-                      )}
-                    </div>
-
-                    {/* ── LOGBOOK ENTRY ─────────────────────────────────────── */}
-                    <div className="space-y-6 text-sm">
-
-                      {/* PLAN vs REAL Comparison */}
-                      {(planPrimario || realRiego) && (
-                        <div className="grid grid-cols-2 gap-6 bg-[#181a19] p-6 border border-[#2a2d2a]">
-                          
-                          {/* LEFT: PLAN (Ghosted) */}
-                          <div className="space-y-3">
-                            <div className="text-[10px] font-serif uppercase tracking-widest text-stone-600 border-b border-[#2a2d2a] pb-2">
-                              Planificado
+                    return (
+                      <React.Fragment key={rd.id}>
+                        {/* Main row */}
+                        <tr className="hover:bg-[#111] group">
+                          <td className="py-2.5 px-3 align-top w-24">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-1 h-3 ${indicatorClass}`} />
+                              <span className="text-[10px] font-mono text-neutral-400">T+{diaCiclo}</span>
                             </div>
-                            {planPrimario ? (
-                              <div className="space-y-2 font-serif text-stone-500">
-                                <div className="capitalize font-medium">
-                                  {planPrimario.tipo === 'fertilizacion' ? 'Riego / Nutrición' : planPrimario.tipo}
+                            <div className="text-[9px] font-mono text-neutral-600 pl-3 mt-1">
+                              {rd.fecha.slice(5)}
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3 align-top">
+                            {realRiego ? (
+                              <div className="space-y-1">
+                                <div className="text-[11px] font-mono text-neutral-200">
+                                  {realRiego.tipo === 'fertilizacion' ? 'EXEC_FERT' : 'EXEC_IRR'}
                                 </div>
-                                {planPrimario.parametros.ph_objetivo != null && (
-                                  <div className="flex justify-between">
-                                    <span>pH</span><span className="font-mono">{planPrimario.parametros.ph_objetivo}</span>
-                                  </div>
-                                )}
-                                {planPrimario.parametros.ec_objetivo != null && (
-                                  <div className="flex justify-between">
-                                    <span>EC</span><span className="font-mono">{planPrimario.parametros.ec_objetivo}</span>
-                                  </div>
-                                )}
-                                {planPrimario.parametros.ml_agua != null && (
-                                  <div className="flex justify-between">
-                                    <span>Vol</span><span className="font-mono">{planPrimario.parametros.ml_agua}ml</span>
-                                  </div>
-                                )}
+                                <div className="text-[10px] font-mono text-neutral-500 flex gap-3">
+                                  {realRiego.parametros_real.ph != null && <span>pH:{realRiego.parametros_real.ph}</span>}
+                                  {realRiego.parametros_real.ec != null && <span>ec:{realRiego.parametros_real.ec}</span>}
+                                  {realRiego.parametros_real.ml_agua != null && <span>vol:{realRiego.parametros_real.ml_agua}</span>}
+                                </div>
                               </div>
                             ) : (
-                              <p className="text-stone-600 italic font-serif">Reposo hidrológico</p>
+                              <div className="text-[11px] font-mono text-neutral-500">IDLE</div>
                             )}
-                          </div>
 
-                          {/* RIGHT: REAL (Solid) */}
-                          <div className="space-y-3">
-                            <div className="text-[10px] font-serif uppercase tracking-widest text-stone-400 border-b border-[#2a2d2a] pb-2">
-                              Ejecutado
-                            </div>
-                            {realRiego?.hecha ? (
-                              <div className="space-y-2 font-serif text-stone-200">
-                                <div className="capitalize font-medium text-stone-100">
-                                  {realRiego.tipo === 'fertilizacion' ? 'Riego / Nutrición' : realRiego.tipo}
-                                </div>
-                                {realRiego.parametros_real.ph != null && (
-                                  <div className="flex justify-between">
-                                    <span className="text-stone-400">pH</span><span className="font-mono">{realRiego.parametros_real.ph}</span>
-                                  </div>
-                                )}
-                                {realRiego.parametros_real.ec != null && (
-                                  <div className="flex justify-between">
-                                    <span className="text-stone-400">EC</span><span className="font-mono">{realRiego.parametros_real.ec}</span>
-                                  </div>
-                                )}
-                                {realRiego.parametros_real.ml_agua != null && (
-                                  <div className="flex justify-between">
-                                    <span className="text-stone-400">Vol</span><span className="font-mono">{realRiego.parametros_real.ml_agua}ml</span>
-                                  </div>
-                                )}
-                              </div>
-                            ) : (
-                              <div className="text-[#d97757] font-serif italic">
-                                Tarea omitida
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Deviations flat chips */}
-                      {tieneDesvios && desvioParams.length > 0 && (
-                        <div className="flex flex-wrap gap-3">
-                          {desvioParams.map((dc, i) => {
-                            const delta = dc.magnitud;
-                            const sign  = delta !== null && delta > 0 ? '+' : '';
-                            const label = dc.campo === 'pH' ? 'pH' : 'EC';
-                            return (
-                              <span
-                                key={i}
-                                className="text-[11px] font-mono px-2 py-1 bg-transparent border border-[#d97757]/30 text-[#d97757] font-medium flex items-center gap-1.5 rounded-sm"
-                              >
-                                <span className="w-1 h-1 rounded-full bg-[#d97757]/70" />
-                                Δ {label} {sign}{delta !== null ? delta.toFixed(1) : '—'}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {/* Other actions (medición, poda, defoliación, etc.) */}
-                      {otrasAcciones.length > 0 && (
-                        <div className="space-y-3 pt-2">
-                          {otrasAcciones.map((ra, rIdx) => {
-                            const err = desviosDia.find(d => d.registroAccionId === ra.id);
-                            return (
-                              <div key={rIdx} className="flex items-start gap-3">
-                                {ra.hecha ? (
-                                  <CheckCircle2 className="w-4 h-4 text-[#8b9a8a] mt-0.5 flex-shrink-0" strokeWidth={1.5} />
-                                ) : (
-                                  <AlertCircle className="w-4 h-4 text-[#d97757] mt-0.5 flex-shrink-0" strokeWidth={1.5} />
-                                )}
-                                <div className="flex-1 flex items-center justify-between">
-                                  <span className={`font-serif text-sm ${ra.hecha ? 'text-stone-300' : 'text-stone-600 line-through'}`}>
-                                    {ra.tipo.charAt(0).toUpperCase() + ra.tipo.slice(1)}
+                            {/* Otras Acciones Inline */}
+                            {otrasAcciones.length > 0 && (
+                              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                {otrasAcciones.map((ra, rIdx) => (
+                                  <span key={rIdx} className={`text-[9px] font-mono px-1 border ${ra.hecha ? 'border-neutral-700 text-neutral-400' : 'border-[#222] text-red-500 line-through'}`}>
+                                    {ra.tipo.toUpperCase()}
                                   </span>
-                                  {err && (
-                                    <span className={`text-[10px] font-mono px-1.5 py-0.5 border flex items-center gap-1.5 rounded-sm ${
-                                      err.gravedadGeneral === 'grave'
-                                        ? 'bg-transparent text-[#d97757] border-[#d97757]/30 font-medium'
-                                        : 'bg-transparent text-[#c28b33] border-[#c28b33]/30 font-medium'
-                                    }`}>
-                                      <span className={`w-1 h-1 rounded-full ${err.gravedadGeneral === 'grave' ? 'bg-[#d97757]/70' : 'bg-[#c28b33]/70'}`} />
-                                      DESVÍO
-                                    </span>
-                                  )}
-                                </div>
+                                ))}
                               </div>
-                            );
-                          })}
-                        </div>
-                      )}
+                            )}
 
-                      {/* Detalle ampliado de desvíos (omisiones u otros) */}
-                      {tieneDesvios && desviosDia.some(d => d.tipoDesvio === 'no_realizada') && (
-                        <div className="bg-[#d97757]/5 p-3 border border-[#d97757]/20 space-y-2">
-                          {desviosDia
-                            .filter(d => d.tipoDesvio === 'no_realizada')
-                            .map((d, dIdx) => (
-                              <p key={dIdx} className="text-[#d97757] font-serif text-xs italic">
-                                Omitido: {d.accionTipo.toLowerCase()} requerida.
-                              </p>
-                            ))
-                          }
-                        </div>
-                      )}
+                            {/* Desvios notas */}
+                            {desviosDia.some(d => d.tipoDesvio === 'no_realizada') && (
+                              <div className="mt-1 text-[9px] font-mono text-red-500">
+                                {desviosDia
+                                  .filter(d => d.tipoDesvio === 'no_realizada')
+                                  .map((d, i) => <span key={i}>ERR_DROP: {d.accionTipo.toUpperCase()}<br/></span>)
+                                }
+                              </div>
+                            )}
+                            {desviosDia.some(d => d.notas) && (
+                              <div className="mt-1 text-[9px] font-mono text-neutral-500 border-l border-neutral-700 pl-2">
+                                {desviosDia.filter(d => d.notas).map((d, i) => <span key={i}>"{d.notas}"<br/></span>)}
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 align-top text-right">
+                            {tieneDesvios && desvioParams.length > 0 ? (
+                              <div className="flex flex-col items-end gap-1">
+                                {desvioParams.map((dc, i) => {
+                                  const delta = dc.magnitud;
+                                  const sign  = delta !== null && delta > 0 ? '+' : '';
+                                  const label = dc.campo === 'pH' ? 'pH' : 'EC';
+                                  const val = delta !== null ? delta.toFixed(1) : '—';
+                                  return (
+                                    <span key={i} className="text-[10px] font-mono text-red-500 border border-[#222] px-1 whitespace-nowrap bg-black">
+                                      [Δ {label} {sign}{val}]
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <span className="text-[10px] font-mono text-neutral-600">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      </React.Fragment>
+                    );
+                  })}
 
-                      {/* Notes */}
-                      {desviosDia.some(d => d.notas) && (
-                        <div className="pt-4 border-t border-[#2a2d2a]/50">
-                          {desviosDia.filter(d => d.notas).map((d, dIdx) => (
-                            <p key={dIdx} className="text-xs text-stone-500 font-serif italic leading-relaxed">
-                              &ldquo;{d.notas}&rdquo;
-                            </p>
-                          ))}
-                        </div>
-                      )}
-
-                    </div>
-                  </div>
-                );
-              })}
-
-              {registrosFiltrados.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
-                  <ArrowRight className="w-5 h-5 text-stone-600" strokeWidth={1} />
-                  <p className="text-sm font-serif italic text-stone-500">Logbook sin entradas para este filtro.</p>
-                </div>
-              )}
+                  {registrosFiltrados.length === 0 && (
+                    <tr>
+                      <td colSpan={3} className="py-8 text-center text-[11px] font-mono text-neutral-600">
+                        0 events found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
 
           </div>
@@ -558,8 +442,8 @@ function renderCustomLineChart(
   domain: [number, number]
 ) {
   const width   = 500;
-  const height  = 200;
-  const padding = { top: 20, right: 20, bottom: 30, left: 40 };
+  const height  = 160;
+  const padding = { top: 10, right: 10, bottom: 20, left: 30 };
 
   const usableWidth  = width  - padding.left - padding.right;
   const usableHeight = height - padding.top  - padding.bottom;
@@ -587,7 +471,7 @@ function renderCustomLineChart(
   });
 
   // Grid lines
-  const gridCount = 5;
+  const gridCount = 4;
   const gridLines: React.ReactNode[] = [];
   for (let i = 0; i < gridCount; i++) {
     const ratio = i / (gridCount - 1);
@@ -599,13 +483,13 @@ function renderCustomLineChart(
         <line
           x1={padding.left} y1={y}
           x2={width - padding.right} y2={y}
-          stroke="#2a2d2a"
+          stroke="#222"
           strokeWidth="1"
         />
         <text
-          x={padding.left - 10} y={y + 3}
-          fill="#6b706d"
-          fontSize="10"
+          x={padding.left - 5} y={y + 3}
+          fill="#525252"
+          fontSize="9"
           fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
           textAnchor="end"
         >
@@ -627,11 +511,10 @@ function renderCustomLineChart(
       {/* X-axis labels */}
       {data.map((d, idx) => {
         const x = padding.left + (idx / (data.length - 1)) * usableWidth;
-        // Only show every Nth label or if it's the first/last
-        if (data.length > 10 && idx % 2 !== 0 && idx !== data.length - 1 && idx !== 0) return null;
+        if (data.length > 10 && idx % 3 !== 0 && idx !== data.length - 1 && idx !== 0) return null;
         
         return (
-          <text key={idx} x={x} y={height - 5} fill="#6b706d" fontSize="9" fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" textAnchor="middle">
+          <text key={idx} x={x} y={height - 2} fill="#525252" fontSize="8" fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" textAnchor="middle">
             {d.fecha.slice(5)}
           </text>
         );
@@ -643,9 +526,9 @@ function renderCustomLineChart(
           fill="none"
           stroke={colorPlan}
           strokeWidth="1"
-          strokeDasharray="4,4"
+          strokeDasharray="2,2"
           points={planPoints.join(' ')}
-          className="opacity-60"
+          className="opacity-50"
         />
       )}
 
@@ -655,13 +538,13 @@ function renderCustomLineChart(
           fill="none"
           stroke={colorReal}
           strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          strokeLinecap="square"
+          strokeLinejoin="miter"
           points={realPoints.join(' ')}
         />
       )}
 
-      {/* Data point circles */}
+      {/* Data point squares instead of circles for technical look */}
       {data.map((d, idx) => {
         const rVal = d[keyReal] as number | null;
         if (rVal === null || rVal === undefined) return null;
@@ -670,13 +553,11 @@ function renderCustomLineChart(
         const yReal = padding.top + usableHeight - ((rVal - minVal) / valRange) * usableHeight;
 
         return (
-          <circle
+          <rect
             key={idx}
-            cx={x} cy={yReal}
-            r="2"
+            x={x - 1.5} y={yReal - 1.5}
+            width="3" height="3"
             fill={colorReal}
-            stroke="#121413"
-            strokeWidth="1"
           />
         );
       })}
