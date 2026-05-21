@@ -41,67 +41,20 @@ const TASK_ICON: Record<string, React.ReactNode> = {
 };
 
 const TASK_BORDER: Record<string, string> = {
-  riego: 'border-l-emerald-500',
-  fertilizacion: 'border-l-violet-500',
-  medicion: 'border-l-cyan-500',
-  poda: 'border-l-orange-500',
-  defoliacion: 'border-l-orange-500',
+  riego: 'border-l-[#849d85]',
+  fertilizacion: 'border-l-[#849d85]',
+  medicion: 'border-l-[#849d85]',
+  poda: 'border-l-[#849d85]',
+  defoliacion: 'border-l-[#849d85]',
 };
 
 const TASK_ICON_BG: Record<string, string> = {
-  riego: 'bg-emerald-500/10 text-emerald-400',
-  fertilizacion: 'bg-violet-500/10 text-violet-400',
-  medicion: 'bg-cyan-500/10 text-cyan-400',
-  poda: 'bg-orange-500/10 text-orange-400',
-  defoliacion: 'bg-orange-500/10 text-orange-400',
+  riego: 'bg-[#849d85]/10 text-emerald-400',
+  fertilizacion: 'bg-[#849d85]/10 text-[#849d85]',
+  medicion: 'bg-[#849d85]/10 text-[#849d85]',
+  poda: 'bg-[#849d85]/10 text-[#849d85]',
+  defoliacion: 'bg-[#849d85]/10 text-[#849d85]',
 };
-
-// ─── Confetti component ───────────────────────────────────────────────────────
-
-function ConfettiOverlay() {
-  const colors = [
-    '#10b981', '#22c55e', '#06b6d4', '#8b5cf6',
-    '#d946ef', '#f59e0b', '#ef4444', '#3b82f6',
-  ];
-  const pieces = Array.from({ length: 28 }, (_, i) => i);
-
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl z-0">
-      {pieces.map((i) => {
-        const color = colors[i % colors.length];
-        const left = `${(i * 37 + 3) % 100}%`;
-        const delay = `${(i * 0.12) % 1.8}s`;
-        const dur = `${1.8 + (i % 5) * 0.3}s`;
-        const size = 5 + (i % 5);
-        const rotate = (i * 47) % 360;
-        return (
-          <span
-            key={i}
-            style={{
-              position: 'absolute',
-              top: '-10px',
-              left,
-              width: `${size}px`,
-              height: `${size * 0.6}px`,
-              backgroundColor: color,
-              borderRadius: '2px',
-              transform: `rotate(${rotate}deg)`,
-              animation: `confettiFall ${dur} ease-in ${delay} infinite`,
-              opacity: 0.85,
-            }}
-          />
-        );
-      })}
-      <style>{`
-        @keyframes confettiFall {
-          0%   { transform: translateY(-10px) rotate(0deg); opacity: 0.9; }
-          80%  { opacity: 0.7; }
-          100% { transform: translateY(340px) rotate(720deg); opacity: 0; }
-        }
-      `}</style>
-    </div>
-  );
-}
 
 // ─── Stepper button ───────────────────────────────────────────────────────────
 
@@ -116,7 +69,7 @@ function StepBtn({
     <button
       type="button"
       onClick={onClick}
-      className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-lg bg-[#1e293b] hover:bg-emerald-500/20 text-foreground font-bold text-base flex items-center justify-center transition-colors"
+      className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-2xl bg-[#3a3938] text-[#e0e0e0] font-bold text-base flex items-center justify-center transition-colors hover:bg-[#849d85] hover:text-[#2a2928]"
     >
       {children}
     </button>
@@ -401,7 +354,7 @@ export default function ModoHoyPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <ClipboardList className="w-6 h-6 text-emerald-500" />
+            <ClipboardList className="w-6 h-6 text-[#849d85]" />
             Modo Hoy
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -409,8 +362,8 @@ export default function ModoHoyPage() {
             completar tus tareas.
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-[#10161d] border border-[#1e293b] rounded-lg px-3 py-1.5 text-xs text-muted-foreground self-start">
-          <Calendar className="w-4 h-4 text-emerald-500" />
+        <div className="flex items-center gap-2 bg-[#2a2928] border border-[#3a3938] rounded-2xl px-3 py-1.5 text-xs text-muted-foreground self-start">
+          <Calendar className="w-4 h-4 text-[#849d85]" />
           <span>
             Jornada simulada: <b>21 de Mayo, 2026</b>
           </span>
@@ -422,7 +375,7 @@ export default function ModoHoyPage() {
         {lotesStatus.map((status) => {
           const isSelected = selectedLote?.id === status.lote.id;
 
-          const radius = 32;
+          const radius = 40;
           const circumference = 2 * Math.PI * radius;
           const strokeDashoffset =
             circumference - (status.porcentaje / 100) * circumference;
@@ -434,18 +387,18 @@ export default function ModoHoyPage() {
                 setSelectedLote(status.lote);
                 setExpandedTask(null);
               }}
-              className={`snap-center min-w-[200px] md:min-w-0 min-h-[160px] p-4 rounded-xl border transition-all text-left flex flex-col items-center gap-3 relative overflow-hidden ${
+              className={`snap-center min-w-[200px] md:min-w-0 min-h-[160px] p-4 rounded-3xl border transition-all text-left flex flex-col items-center gap-3 relative overflow-hidden ${
                 isSelected
-                  ? 'bg-gradient-to-b from-[#111921] to-[#0c1218] border-emerald-500/40 shadow-lg shadow-emerald-500/5 ring-1 ring-emerald-500/20'
-                  : 'bg-[#10161d] border-[#1e293b] hover:border-emerald-500/20 hover:bg-[#131b24]'
+                  ? 'bg-[#2a2928] border-[#849d85] shadow-none'
+                  : 'bg-[#2a2928] border-[#3a3938] hover:border-[#849d85]/50'
               }`}
             >
               {/* Progress ring — centred, 80×80 */}
               <div className="relative flex items-center justify-center">
                 <svg
-                  viewBox="0 0 80 80"
-                  width="80"
-                  height="80"
+                  viewBox="0 0 100 100"
+                  width="100"
+                  height="100"
                   className="transform -rotate-90"
                 >
                   <circle
@@ -471,7 +424,7 @@ export default function ModoHoyPage() {
                 </svg>
                 {/* Inner text */}
                 <div className="absolute flex flex-col items-center justify-center">
-                  <span className="text-[18px] font-bold leading-none text-foreground">
+                  <span className="text-3xl font-serif text-[#e0e0e0] font-medium tracking-tight">
                     {status.porcentaje}%
                   </span>
                   <span className="text-[9px] text-muted-foreground leading-tight">
@@ -501,9 +454,7 @@ export default function ModoHoyPage() {
                 </div>
               </div>
 
-              {isSelected && (
-                <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full blur-2xl -mr-6 -mt-6" />
-              )}
+              {/* {isSelected && null} */}
             </button>
           );
         })}
@@ -518,42 +469,18 @@ export default function ModoHoyPage() {
 
             {/* Celebration / progress card */}
             {selectedStatus.porcentaje === 100 ? (
-              <div className="relative bg-gradient-to-br from-[#0c2e1f] to-[#041a12] border border-emerald-500/40 p-6 rounded-2xl text-center space-y-4 shadow-xl shadow-emerald-950/10 overflow-hidden min-h-[180px]">
-                <ConfettiOverlay />
-                <div className="relative z-10 space-y-3">
-                  <div className="w-16 h-16 mx-auto flex items-center justify-center">
-                    <CheckCircle2
-                      className={`w-16 h-16 text-emerald-400 ${celebSpinDone ? '' : 'animate-spin'}`}
-                      style={{
-                        transition: 'animation 0.3s',
-                        animationDuration: '1s',
-                      }}
-                    />
-                  </div>
-                  <h3 className="font-extrabold text-lg bg-gradient-to-r from-emerald-300 to-teal-100 bg-clip-text text-transparent">
-                    ¡Día Cerrado!
-                  </h3>
-                  <p className="text-xs text-emerald-400/80 leading-normal">
-                    100% completado en{' '}
-                    <b>{selectedStatus.ubicacion}</b>. ¡Gran trabajo!
-                  </p>
-                  <div className="bg-black/30 p-3 rounded-lg border border-emerald-500/10 text-left">
-                    <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wide">
-                      Resumen General
-                    </div>
-                    <div className="text-xs text-foreground font-semibold flex items-center gap-1.5 mt-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>
-                        Lotes cerrados hoy: {totalLotesCompletados} de{' '}
-                        {lotesStatus.length}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+              <div className="flex flex-col items-center justify-center bg-[#2a2928] border border-[#3a3938] p-8 rounded-3xl text-center space-y-4 shadow-none min-h-[180px] animate-in fade-in duration-1000">
+                <CheckCircle2 className="w-12 h-12 text-[#849d85] mb-2" strokeWidth={1.5} />
+                <h3 className="font-serif text-3xl text-[#e0e0e0]">
+                  Día completado
+                </h3>
+                <p className="text-sm text-[#e0e0e0]/70 font-sans">
+                  Todas las tareas en {selectedStatus.ubicacion} están listas.
+                </p>
               </div>
             ) : (
-              <div className="bg-[#10161d] border border-[#1e293b] p-6 rounded-2xl text-center space-y-4">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center mx-auto text-emerald-500">
+              <div className="bg-[#2a2928] border border-[#3a3938] p-6 rounded-2xl text-center space-y-4">
+                <div className="w-12 h-12 rounded-full bg-[#849d85]/5 border border-[#849d85]/10 flex items-center justify-center mx-auto text-[#849d85]">
                   <ClipboardList className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
@@ -566,9 +493,9 @@ export default function ModoHoyPage() {
                     tareas para completar la jornada.
                   </p>
                 </div>
-                <div className="w-full bg-[#1e293b] rounded-full h-1.5">
+                <div className="w-full bg-[#3a3938] rounded-full h-1.5">
                   <div
-                    className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
+                    className="bg-[#849d85] h-1.5 rounded-full transition-all duration-500"
                     style={{ width: `${selectedStatus.porcentaje}%` }}
                   />
                 </div>
@@ -580,9 +507,9 @@ export default function ModoHoyPage() {
             )}
 
             {/* Precintos */}
-            <div className="bg-[#10161d] border border-[#1e293b] p-4 rounded-xl space-y-3">
-              <h3 className="font-bold text-sm text-foreground flex items-center gap-1.5 border-b border-[#1e293b] pb-2">
-                <Layers className="w-4 h-4 text-emerald-500" />
+            <div className="bg-[#2a2928] border border-[#3a3938] p-4 rounded-3xl space-y-3">
+              <h3 className="font-bold text-sm text-foreground flex items-center gap-1.5 border-b border-[#3a3938] pb-2">
+                <Layers className="w-4 h-4 text-[#849d85]" />
                 Plantas &amp; Precintos (
                 {
                   mockDb.especimenes.filter(
@@ -603,7 +530,7 @@ export default function ModoHoyPage() {
                   .map((p) => (
                     <div
                       key={p.id}
-                      className="bg-[#090d10] border border-[#1e293b]/70 p-2 rounded-lg flex items-center justify-between text-xs hover:border-[#10b981]/20 transition-all"
+                      className="bg-[#1a1918] border border-[#3a3938]/70 p-2 rounded-2xl flex items-center justify-between text-xs hover:border-[#10b981]/20 transition-all"
                     >
                       <div className="flex items-center gap-2">
                         <div
@@ -621,7 +548,7 @@ export default function ModoHoyPage() {
                           {p.codigo_completo}
                         </span>
                       </div>
-                      <span className="text-[10px] text-muted-foreground uppercase bg-[#10161d] px-2 py-0.5 rounded font-bold">
+                      <span className="text-[10px] text-muted-foreground uppercase bg-[#2a2928] px-2 py-0.5 rounded font-bold">
                         {p.estado === 'activo' ? 'viva' : p.estado}
                       </span>
                     </div>
@@ -630,9 +557,9 @@ export default function ModoHoyPage() {
             </div>
 
             {/* Extra action card */}
-            <div className="bg-[#10161d] border border-[#1e293b] p-4 rounded-xl space-y-3">
+            <div className="bg-[#2a2928] border border-[#3a3938] p-4 rounded-3xl space-y-3">
               <h3 className="font-bold text-sm text-foreground flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-emerald-500" />
+                <Sparkles className="w-4 h-4 text-[#849d85]" />
                 Registrar Acción Extra
               </h3>
               <p className="text-xs text-muted-foreground leading-normal">
@@ -642,7 +569,7 @@ export default function ModoHoyPage() {
 
               {/* Success banner */}
               {successBanner && (
-                <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg px-3 py-2 text-xs font-semibold animate-pulse">
+                <div className="flex items-center gap-2 bg-[#849d85]/10 text-emerald-400 border border-[#849d85]/30 rounded-2xl px-3 py-2 text-xs font-semibold animate-pulse">
                   <CheckCircle2 className="w-4 h-4" />
                   ¡Acción extra registrada con éxito!
                 </div>
@@ -652,7 +579,7 @@ export default function ModoHoyPage() {
                 <button
                   type="button"
                   onClick={() => setShowExtraForm(true)}
-                  className="w-full min-h-[44px] py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                  className="w-full min-h-[44px] py-2 bg-[#849d85]/10 hover:bg-[#849d85]/20 text-emerald-400 border border-[#849d85]/20 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
                 >
                   <Plus className="w-4 h-4" />
                   Agregar Labor Extra
@@ -666,7 +593,7 @@ export default function ModoHoyPage() {
                     <select
                       value={extraTipo}
                       onChange={(e) => setExtraTipo(e.target.value)}
-                      className="w-full mt-1 bg-[#090d10] border border-[#1e293b] text-sm text-foreground rounded-lg px-3 py-2 focus:outline-none focus:border-emerald-500 min-h-[44px]"
+                      className="w-full mt-1 bg-[#1a1918] border border-[#3a3938] text-sm text-foreground rounded-2xl px-3 py-2 focus:outline-none focus:border-[#849d85] min-h-[44px]"
                     >
                       <option value="poda">Poda</option>
                       <option value="defoliacion">Defoliación</option>
@@ -685,14 +612,14 @@ export default function ModoHoyPage() {
                       onChange={(e) => setExtraNotas(e.target.value)}
                       rows={3}
                       placeholder="Describe la acción realizada..."
-                      className="w-full mt-1 bg-[#090d10] border border-[#1e293b] text-sm text-foreground rounded-lg px-3 py-2 focus:outline-none focus:border-emerald-500 resize-none"
+                      className="w-full mt-1 bg-[#1a1918] border border-[#3a3938] text-sm text-foreground rounded-2xl px-3 py-2 focus:outline-none focus:border-[#849d85] resize-none"
                     />
                   </div>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={registrarAccionExtra}
-                      className="flex-1 min-h-[44px] bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold transition-all"
+                      className="flex-1 min-h-[44px] bg-[#849d85]/20 hover:bg-[#849d85]/30 text-emerald-400 border border-[#849d85]/30 rounded-2xl text-xs font-bold transition-all"
                     >
                       Confirmar
                     </button>
@@ -702,7 +629,7 @@ export default function ModoHoyPage() {
                         setShowExtraForm(false);
                         setExtraNotas('');
                       }}
-                      className="flex-1 min-h-[44px] bg-[#090d10] hover:bg-[#1a232d] text-muted-foreground border border-[#1e293b] rounded-lg text-xs font-bold transition-all"
+                      className="flex-1 min-h-[44px] bg-[#1a1918] hover:bg-[#1a232d] text-muted-foreground border border-[#3a3938] rounded-2xl text-xs font-bold transition-all"
                     >
                       Cancelar
                     </button>
@@ -716,9 +643,9 @@ export default function ModoHoyPage() {
           <div className="lg:col-span-2 space-y-4 order-last lg:order-first">
 
             {/* Checklist header */}
-            <div className="bg-[#10161d] border border-[#1e293b] p-4 rounded-xl flex items-center justify-between">
+            <div className="bg-[#2a2928] border border-[#3a3938] p-4 rounded-3xl flex items-center justify-between">
               <div>
-                <span className="text-xs text-emerald-500 font-bold uppercase tracking-wider">
+                <span className="text-xs text-[#849d85] font-bold uppercase tracking-wider">
                   Lote Activo
                 </span>
                 <h2 className="text-lg font-bold text-foreground">
@@ -729,12 +656,12 @@ export default function ModoHoyPage() {
                 </p>
               </div>
               {selectedStatus.porcentaje === 100 ? (
-                <div className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-bold">
+                <div className="flex items-center gap-1.5 bg-[#849d85]/10 text-emerald-400 border border-[#849d85]/30 px-3 py-1.5 rounded-2xl text-xs font-bold">
                   <Sparkles className="w-4 h-4" />
                   Cerrado para hoy
                 </div>
               ) : (
-                <div className="text-xs text-muted-foreground bg-[#090d10] border border-[#1e293b] px-3 py-1.5 rounded-lg">
+                <div className="text-xs text-muted-foreground bg-[#1a1918] border border-[#3a3938] px-3 py-1.5 rounded-2xl">
                   Progreso:{' '}
                   <b>
                     {selectedStatus.completadas} de {selectedStatus.totalTareas}
@@ -745,7 +672,7 @@ export default function ModoHoyPage() {
 
             {/* Photo success banner */}
             {photoSuccess && (
-              <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-xl px-4 py-2.5 text-xs font-semibold">
+              <div className="flex items-center gap-2 bg-[#849d85]/10 text-emerald-400 border border-[#849d85]/30 rounded-3xl px-4 py-2.5 text-xs font-semibold">
                 <Camera className="w-4 h-4" />
                 Foto del espécimen capturada con éxito.
               </div>
@@ -811,10 +738,10 @@ export default function ModoHoyPage() {
                 return (
                   <div
                     key={acc.id}
-                    className={`border border-l-4 rounded-xl transition-all ${borderColor} ${
+                    className={`border border-l-4 rounded-3xl transition-all ${borderColor} ${
                       acc.hecha
-                        ? 'bg-[#10161d]/60 border-[#1e293b]'
-                        : 'bg-[#10161d] border-[#1e293b] hover:border-[#10b981]/20'
+                        ? 'bg-[#2a2928]/60 border-[#3a3938]'
+                        : 'bg-[#2a2928] border-[#3a3938] hover:border-[#10b981]/20'
                     } ${hayDesvios && acc.hecha ? 'border-amber-500/30 bg-amber-500/[0.02]' : ''}`}
                   >
                     {/* Main row */}
@@ -822,7 +749,7 @@ export default function ModoHoyPage() {
 
                       {/* Type icon — left */}
                       <div
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${iconBg}`}
+                        className={`w-8 h-8 rounded-2xl flex items-center justify-center shrink-0 ${iconBg}`}
                       >
                         {TASK_ICON[tipoKey] ?? (
                           <ClipboardList className="w-4 h-4" />
@@ -833,7 +760,7 @@ export default function ModoHoyPage() {
                       <div className="flex-1 min-w-0 py-3">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3
-                            className={`font-bold text-sm ${
+                            className={`font-sans text-lg font-medium ${
                               acc.hecha
                                 ? 'text-muted-foreground line-through'
                                 : 'text-foreground'
@@ -870,7 +797,7 @@ export default function ModoHoyPage() {
                         {/* Photo thumbnail */}
                         {acc.foto_url && (
                           <div className="pt-1.5">
-                            <div className="relative w-20 h-12 rounded-md overflow-hidden border border-[#1e293b]">
+                            <div className="relative w-20 h-12 rounded-md overflow-hidden border border-[#3a3938]">
                               <img
                                 src={acc.foto_url}
                                 alt="Foto espécimen"
@@ -885,7 +812,7 @@ export default function ModoHoyPage() {
                       <button
                         type="button"
                         onClick={() => subirFoto(index)}
-                        className="min-w-[44px] min-h-[44px] p-2 rounded-lg border border-[#1e293b] hover:bg-[#1a232d] hover:border-emerald-500/30 transition-all text-muted-foreground hover:text-emerald-500 flex items-center justify-center"
+                        className="min-w-[44px] min-h-[44px] p-2 rounded-2xl border border-[#3a3938] hover:bg-[#1a232d] hover:border-[#849d85]/30 transition-all text-muted-foreground hover:text-[#849d85] flex items-center justify-center"
                         title="Subir foto de planta"
                       >
                         <Camera className="w-4 h-4" />
@@ -898,7 +825,7 @@ export default function ModoHoyPage() {
                           onClick={() =>
                             setExpandedTask(isExpanded ? null : index)
                           }
-                          className="min-w-[44px] min-h-[44px] p-2 rounded-lg border border-[#1e293b] hover:bg-[#1a232d] transition-all text-muted-foreground hover:text-foreground flex items-center justify-center"
+                          className="min-w-[44px] min-h-[44px] p-2 rounded-2xl border border-[#3a3938] hover:bg-[#1a232d] transition-all text-muted-foreground hover:text-foreground flex items-center justify-center"
                           title="Expandir parámetros"
                         >
                           {isExpanded ? (
@@ -913,19 +840,21 @@ export default function ModoHoyPage() {
                       <button
                         type="button"
                         onClick={() => toggleTarea(index)}
-                        className="ml-auto min-w-[44px] min-h-[44px] flex items-center justify-center transition-transform hover:scale-110 focus:outline-none"
+                        className="ml-auto min-w-[48px] min-h-[48px] flex items-center justify-center focus:outline-none"
                       >
                         {acc.hecha ? (
-                          <CheckCircle2 className="w-6 h-6 text-emerald-500 fill-emerald-500/10" />
+                          <div className="w-8 h-8 rounded-full bg-[#849d85] flex items-center justify-center transition-all">
+                            <CheckCircle2 className="w-5 h-5 text-[#2a2928]" />
+                          </div>
                         ) : (
-                          <Circle className="w-6 h-6 text-muted-foreground hover:text-emerald-500" />
+                          <div className="w-8 h-8 rounded-full border-2 border-[#3a3938] bg-[#2a2928] flex items-center justify-center hover:border-[#849d85]/50 transition-all" />
                         )}
                       </button>
                     </div>
 
                     {/* ── Expandable parameter controls ── */}
                     {isExpanded && hasParams && (
-                      <div className="border-t border-[#1e293b]/50 px-4 py-4 bg-[#0a0f14] rounded-b-xl">
+                      <div className="border-t border-[#3a3938]/50 px-4 py-4 bg-[#0a0f14] rounded-b-xl">
                         {(pact.tipo === 'riego' ||
                           pact.tipo === 'fertilizacion') && (
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -940,7 +869,7 @@ export default function ModoHoyPage() {
                                   </span>
                                 )}
                               </label>
-                              <div className="flex items-center gap-1.5 bg-[#10161d] border border-[#1e293b] rounded-lg p-1.5">
+                              <div className="flex items-center gap-1.5 bg-[#2a2928] border border-[#3a3938] rounded-2xl p-1.5">
                                 <StepBtn
                                   onClick={() =>
                                     cambiarParametro(
@@ -1001,7 +930,7 @@ export default function ModoHoyPage() {
                                   </span>
                                 )}
                               </label>
-                              <div className="flex items-center gap-1.5 bg-[#10161d] border border-[#1e293b] rounded-lg p-1.5">
+                              <div className="flex items-center gap-1.5 bg-[#2a2928] border border-[#3a3938] rounded-2xl p-1.5">
                                 <StepBtn
                                   onClick={() =>
                                     cambiarParametro(
@@ -1065,7 +994,7 @@ export default function ModoHoyPage() {
                                   </span>
                                 )}
                               </label>
-                              <div className="flex items-center gap-1.5 bg-[#10161d] border border-[#1e293b] rounded-lg p-1.5">
+                              <div className="flex items-center gap-1.5 bg-[#2a2928] border border-[#3a3938] rounded-2xl p-1.5">
                                 <StepBtn
                                   onClick={() =>
                                     cambiarParametro(
@@ -1140,7 +1069,7 @@ export default function ModoHoyPage() {
                                     Number(e.target.value),
                                   )
                                 }
-                                className="w-full min-h-[44px] bg-[#10161d] border border-[#1e293b] text-sm font-bold text-foreground rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500"
+                                className="w-full min-h-[44px] bg-[#2a2928] border border-[#3a3938] text-sm font-bold text-foreground rounded-2xl px-3 py-1.5 focus:outline-none focus:border-[#849d85]"
                               />
                             </div>
                             <div className="space-y-1.5">
@@ -1157,7 +1086,7 @@ export default function ModoHoyPage() {
                                     Number(e.target.value),
                                   )
                                 }
-                                className="w-full min-h-[44px] bg-[#10161d] border border-[#1e293b] text-sm font-bold text-foreground rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500"
+                                className="w-full min-h-[44px] bg-[#2a2928] border border-[#3a3938] text-sm font-bold text-foreground rounded-2xl px-3 py-1.5 focus:outline-none focus:border-[#849d85]"
                               />
                             </div>
                           </div>

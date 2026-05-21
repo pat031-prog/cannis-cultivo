@@ -22,9 +22,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   // Mapear roles a datos visuales
   const ROL_INFO = {
-    jardinero: { nombre: 'Juan (Jardinero)', color: 'text-phase-propagacion border-phase-propagacion bg-phase-propagacion/10' },
-    director: { nombre: 'Tabaré (Director)', color: 'text-phase-floracion border-phase-floracion bg-phase-floracion/10' },
-    admin: { nombre: 'Sophia (Admin/Compliance)', color: 'text-amber-500 border-amber-500 bg-amber-500/10' },
+    jardinero: { nombre: 'Juan (Jardinero)', color: 'text-phase-propagacion border-phase-propagacion bg-phase-propagacion/5' },
+    director: { nombre: 'Tabaré (Director)', color: 'text-phase-floracion border-phase-floracion bg-phase-floracion/5' },
+    admin: { nombre: 'Sophia (Admin/Compliance)', color: 'text-[#d4a373] border-[#d4a373] bg-[#d4a373]/5' },
   };
 
   // Definir todas las pantallas posibles con sus permisos
@@ -77,21 +77,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const filteredMenuItems = MENU_ITEMS.filter(item => item.roles.includes(activeRole));
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090d10] text-[#f1f5f9] select-none">
+    <div className="min-h-screen flex flex-col bg-[#1f1e1d] text-[#f4f1ea] select-none">
       
       {/* 1. TOP HEADER NAVIGATION */}
-      <header className="sticky top-0 z-40 w-full glass border-b border-[#1e293b] px-4 md:px-8 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-40 w-full bg-[#1f1e1d] border-b border-[#3a3938] px-4 md:px-8 py-3 flex items-center justify-between">
         
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 shadow-lg shadow-emerald-500/10 animate-pulse-slow">
-            <Sprout className="w-5 h-5 text-emerald-500" />
+          <div className="w-8 h-8 rounded flex items-center justify-center border border-[#3a3938] bg-[#2a2928]">
+            <Sprout className="w-5 h-5 text-[#849d85]" />
           </div>
           <div>
-            <span className="font-bold text-lg tracking-wide bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent">
+            <span className="font-serif font-bold text-xl tracking-wide text-[#f4f1ea]">
               CANNIS
             </span>
-            <span className="hidden sm:block text-[10px] text-emerald-500 font-semibold tracking-widest uppercase -mt-1">
+            <span className="hidden sm:block text-[10px] text-[#a3a19e] font-medium tracking-widest uppercase -mt-1">
               Cultivo Intelligence
             </span>
           </div>
@@ -101,13 +101,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex items-center gap-3">
           
           {/* Simulador de Rol (Desktop & Tablet) */}
-          <div className="hidden sm:flex items-center gap-1.5 bg-[#10161d] p-1 rounded-lg border border-[#1e293b]">
-            <span className="text-[10px] text-muted-foreground uppercase px-2 font-bold">Simular:</span>
+          <div className="hidden sm:flex items-center gap-1.5 bg-[#2a2928] p-1 rounded border border-[#3a3938]">
+            <span className="text-[10px] text-muted-foreground uppercase px-2 font-medium">Simular:</span>
             <button
               onClick={() => setActiveRole('jardinero')}
-              className={`text-xs px-2.5 py-1 rounded-md font-medium transition-all ${
+              className={`text-xs px-2.5 py-1 rounded font-medium transition-colors ${
                 activeRole === 'jardinero' 
-                  ? 'bg-phase-propagacion/20 text-phase-propagacion border border-phase-propagacion/40 shadow-sm' 
+                  ? 'bg-[#1f1e1d] text-phase-propagacion border border-[#3a3938]' 
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -115,9 +115,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </button>
             <button
               onClick={() => setActiveRole('director')}
-              className={`text-xs px-2.5 py-1 rounded-md font-medium transition-all ${
+              className={`text-xs px-2.5 py-1 rounded font-medium transition-colors ${
                 activeRole === 'director' 
-                  ? 'bg-phase-floracion/20 text-phase-floracion border border-phase-floracion/40 shadow-sm' 
+                  ? 'bg-[#1f1e1d] text-phase-floracion border border-[#3a3938]' 
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -125,9 +125,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </button>
             <button
               onClick={() => setActiveRole('admin')}
-              className={`text-xs px-2.5 py-1 rounded-md font-medium transition-all ${
+              className={`text-xs px-2.5 py-1 rounded font-medium transition-colors ${
                 activeRole === 'admin' 
-                  ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40 shadow-sm' 
+                  ? 'bg-[#1f1e1d] text-[#d4a373] border border-[#3a3938]' 
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -140,7 +140,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <select
               value={activeRole}
               onChange={(e) => setActiveRole(e.target.value as any)}
-              className="text-xs bg-[#10161d] border border-[#1e293b] rounded-lg px-2 py-1.5 focus:outline-none focus:border-emerald-500 font-semibold"
+              className="text-xs bg-[#2a2928] border border-[#3a3938] rounded px-2 py-1.5 focus:outline-none focus:border-[#849d85] font-medium"
             >
               <option value="jardinero">Jardinero</option>
               <option value="director">Director</option>
@@ -161,9 +161,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 relative">
         
         {/* 2. DESKTOP SIDEBAR MENU */}
-        <aside className="hidden lg:flex flex-col w-64 border-r border-[#1e293b] bg-[#0c1218] p-6 space-y-6 sticky top-[57px] h-[calc(100vh-57px)]">
+        <aside className="hidden lg:flex flex-col w-64 border-r border-[#3a3938] bg-[#1f1e1d] p-6 space-y-6 sticky top-[57px] h-[calc(100vh-57px)]">
           <div className="space-y-1">
-            <span className="text-[10px] text-muted-foreground font-bold tracking-wider uppercase px-3 block">
+            <span className="text-[10px] text-muted-foreground font-medium tracking-wider uppercase px-3 block">
               Menú Principal
             </span>
             <nav className="space-y-1 pt-2">
@@ -174,13 +174,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group ${
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium transition-colors group ${
                       isActive 
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-[#10161d]'
+                        ? 'bg-[#2a2928] text-foreground border border-[#3a3938]' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-[#2a2928]'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${isActive ? 'text-emerald-400' : 'text-muted-foreground'}`} />
+                    <Icon className={`w-4 h-4 transition-transform ${isActive ? 'text-[#849d85]' : 'text-muted-foreground'}`} />
                     <div>
                       <span>{item.label}</span>
                       <span className="text-[10px] text-muted-foreground block font-normal leading-tight mt-0.5">
@@ -193,9 +193,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </nav>
           </div>
 
-          <div className="mt-auto border-t border-[#1e293b] pt-4 space-y-2 text-xs text-muted-foreground">
+          <div className="mt-auto border-t border-[#3a3938] pt-4 space-y-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2 px-3">
-              <Layers className="w-3.5 h-3.5 text-emerald-500" />
+              <Layers className="w-3.5 h-3.5 text-[#849d85]" />
               <span>Versión 1.0 (MVP)</span>
             </div>
             <p className="px-3 leading-normal">
@@ -212,7 +212,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
 
         {/* 4. MOBILE BOTTOM NAVIGATION */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 glass border-t border-[#1e293b] px-2 py-2 flex items-center justify-around shadow-2xl">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#1f1e1d] border-t border-[#3a3938] px-2 py-2 flex items-center justify-around">
           {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname.startsWith(item.href);
@@ -220,16 +220,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex flex-col items-center justify-center min-h-[52px] px-4 rounded-xl transition-all ${
+                className={`relative flex flex-col items-center justify-center min-h-[52px] px-4 rounded transition-colors ${
                   isActive 
-                    ? 'text-emerald-400 font-semibold' 
+                    ? 'text-[#f4f1ea] font-medium' 
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <Icon className={`w-5.5 h-5.5 mb-1 ${isActive ? 'text-emerald-400' : 'text-muted-foreground'}`} />
+                <Icon className={`w-5.5 h-5.5 mb-1 ${isActive ? 'text-[#849d85]' : 'text-muted-foreground'}`} />
                 <span className="text-[10px] tracking-tight">{item.label}</span>
                 {isActive && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-emerald-500" />
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#849d85]" />
                 )}
               </Link>
             );

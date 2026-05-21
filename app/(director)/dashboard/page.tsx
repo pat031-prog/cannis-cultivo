@@ -30,18 +30,10 @@ function calcVPD(temp: number, humidity: number): number {
 }
 
 function vpdColor(vpd: number): string {
-  if (vpd < 0.4) return 'text-blue-400';
-  if (vpd < 0.8) return 'text-emerald-400';
-  if (vpd <= 1.2) return 'text-emerald-400';
-  if (vpd <= 1.6) return 'text-amber-400';
-  return 'text-red-400';
-}
-
-function vpdGlowClass(vpd: number): string {
-  if (vpd < 0.4) return 'drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]';
-  if (vpd <= 1.2) return 'drop-shadow-[0_0_8px_rgba(16,185,129,0.6)]';
-  if (vpd <= 1.6) return 'drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]';
-  return 'drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]';
+  if (vpd < 0.8) return 'text-[#849d85]';
+  if (vpd <= 1.2) return 'text-[#849d85]';
+  if (vpd <= 1.6) return 'text-[#d4a373]';
+  return 'text-[#d97757]';
 }
 
 function vpdLabel(vpd: number): string {
@@ -66,18 +58,28 @@ function deterministicSparkline(loteId: string, base: number, length = 12): numb
   });
 }
 
-function buildPolylinePoints(values: number[], w = 120, h = 30): string {
+function buildSmoothPath(values: number[], w = 120, h = 30): string {
   if (values.length < 2) return '';
   const minV = Math.min(...values) - 0.5;
   const maxV = Math.max(...values) + 0.5;
   const range = maxV - minV || 1;
-  return values
-    .map((v, i) => {
-      const x = (i / (values.length - 1)) * w;
-      const y = h - ((v - minV) / range) * h;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(' ');
+  const pts = values.map((v, i) => {
+    const x = (i / (values.length - 1)) * w;
+    const y = h - ((v - minV) / range) * h;
+    return { x, y };
+  });
+
+  let d = `M ${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i];
+    const p1 = pts[i + 1];
+    const cp1x = p0.x + (p1.x - p0.x) / 2;
+    const cp1y = p0.y;
+    const cp2x = p0.x + (p1.x - p0.x) / 2;
+    const cp2y = p1.y;
+    d += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p1.x.toFixed(1)},${p1.y.toFixed(1)}`;
+  }
+  return d;
 }
 
 // ─── Sub-metric chip progress bar ────────────────────────────────────────────
@@ -90,17 +92,14 @@ function progressPercent(value: number, min: number, max: number): number {
 
 function LedSemaforo({ estado }: { estado: 'green' | 'amber' | 'red' }) {
   const cfg = {
-    green: { bg: 'bg-emerald-500', shadow: 'shadow-emerald-500/60' },
-    amber: { bg: 'bg-amber-400',   shadow: 'shadow-amber-400/60' },
-    red:   { bg: 'bg-red-500',     shadow: 'shadow-red-500/60' },
+    green: { bg: 'bg-[#849d85]' },
+    amber: { bg: 'bg-[#d4a373]' },
+    red:   { bg: 'bg-[#d97757]' },
   }[estado];
 
   return (
     <span
-      className={`
-        inline-block w-2.5 h-2.5 rounded-full animate-pulse shadow-lg
-        ${cfg.bg} ${cfg.shadow}
-      `}
+      className={`inline-block w-2.5 h-2.5 rounded-full ${cfg.bg}`}
     />
   );
 }
@@ -113,7 +112,7 @@ function SensorChip({
   unit,
   min,
   max,
-  barColor = 'bg-emerald-500',
+  barColor = 'bg-[#849d85]',
 }: {
   icon: React.ReactNode;
   value: number;
@@ -124,14 +123,14 @@ function SensorChip({
 }) {
   const pct = progressPercent(value, min, max);
   return (
-    <div className="flex-1 min-w-0 bg-[#090d10]/60 border border-[#1e293b]/80 rounded-xl p-2.5 flex flex-col gap-1.5 min-h-[44px]">
+    <div className="flex-1 min-w-0 bg-[#323130] border border-[#3d3a35] rounded-xl p-2.5 flex flex-col gap-1.5 min-h-[44px]">
       <div className="flex items-center gap-1">
         {icon}
-        <span className="font-bold text-sm text-foreground leading-none">{value.toFixed(1)}</span>
-        <span className="text-[10px] text-muted-foreground leading-none">{unit}</span>
+        <span className="font-bold text-sm text-[#e0deda] leading-none">{value.toFixed(1)}</span>
+        <span className="text-[10px] text-[#a3a19e] leading-none">{unit}</span>
       </div>
       {/* progress bar */}
-      <div className="h-1 w-full rounded-full bg-[#1e293b]">
+      <div className="h-1 w-full rounded-full bg-[#3d3a35]">
         <div
           className={`h-1 rounded-full transition-all duration-700 ${barColor}`}
           style={{ width: `${pct}%` }}
@@ -152,19 +151,19 @@ function CarpaCard({ carpa }: { carpa: any }) {
 
   // Sparkline data (deterministic, based on lote.id)
   const sparkPoints = deterministicSparkline(lote.id, temp);
-  const polyline = buildPolylinePoints(sparkPoints);
+  const smoothPath = buildSmoothPath(sparkPoints);
 
-  // Card border/glow based on semáforo state
+  // Card border based on semáforo state
   const borderClass =
     estadoSemaforo === 'red'
-      ? 'border-red-500/40 shadow-red-950/10'
+      ? 'border-[#d97757]/40'
       : estadoSemaforo === 'amber'
-      ? 'border-amber-500/30 shadow-amber-950/10'
-      : 'border-[#1e293b] hover:border-emerald-500/20';
+      ? 'border-[#d4a373]/30'
+      : 'border-[#3d3a35] hover:border-[#849d85]/30';
 
   // Sparkline stroke color
   const sparkStroke =
-    estadoSemaforo === 'red' ? '#ef4444' : estadoSemaforo === 'amber' ? '#f59e0b' : '#10b981';
+    estadoSemaforo === 'red' ? '#d97757' : estadoSemaforo === 'amber' ? '#d4a373' : '#849d85';
 
   const { setSelectedLoteId } = useAppContext();
 
@@ -173,8 +172,8 @@ function CarpaCard({ carpa }: { carpa: any }) {
       className={`
         snap-center min-w-[280px] flex-shrink-0
         md:min-w-0 md:flex-shrink
-        bg-[#10161d] border rounded-2xl p-5 flex flex-col min-h-[280px]
-        relative overflow-hidden group shadow-lg transition-all
+        bg-[#2a2928] border rounded-2xl p-5 flex flex-col min-h-[280px]
+        relative overflow-hidden group transition-all
         ${borderClass}
       `}
     >
@@ -182,10 +181,10 @@ function CarpaCard({ carpa }: { carpa: any }) {
       <div
         className={`absolute top-0 left-0 right-0 h-[2px] ${
           estadoSemaforo === 'red'
-            ? 'bg-gradient-to-r from-red-500 to-red-400'
+            ? 'bg-[#d97757]'
             : estadoSemaforo === 'amber'
-            ? 'bg-gradient-to-r from-amber-500 to-yellow-400'
-            : 'bg-gradient-to-r from-emerald-600 to-teal-500'
+            ? 'bg-[#d4a373]'
+            : 'bg-[#849d85]'
         }`}
       />
 
@@ -193,18 +192,18 @@ function CarpaCard({ carpa }: { carpa: any }) {
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="space-y-0.5 min-w-0">
           <div className="flex items-center gap-1.5">
-            <MapPin className="w-3 h-3 text-emerald-500 shrink-0" />
-            <span className="font-bold text-xs tracking-wide text-foreground truncate">
+            <MapPin className="w-3 h-3 text-[#849d85] shrink-0" />
+            <span className="font-serif text-xs tracking-wide text-[#e0deda] truncate">
               {ubicacion?.posicion}
             </span>
-            <span className="text-[10px] text-muted-foreground shrink-0">
+            <span className="text-[10px] text-[#a3a19e] shrink-0 font-serif">
               ({ubicacion?.sala})
             </span>
           </div>
-          <h3 className="font-extrabold text-sm text-foreground group-hover:text-emerald-400 transition-colors leading-tight truncate">
+          <h3 className="font-serif text-lg font-medium text-[#e0deda] group-hover:text-[#849d85] transition-colors leading-tight truncate">
             {genetica?.nombre ?? 'Sin genética'}
           </h3>
-          <span className="text-[10px] text-muted-foreground block">
+          <span className="text-[10px] text-[#a3a19e] block font-serif">
             Lote: <b>{lote.codigo}</b> · Sem <b>{semana}</b> D<b>{dia}</b> · {fase}
           </span>
         </div>
@@ -213,12 +212,12 @@ function CarpaCard({ carpa }: { carpa: any }) {
         <div className="flex flex-col items-center gap-1 shrink-0">
           <LedSemaforo estado={estadoSemaforo} />
           <span
-            className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-full border ${
+            className={`text-[9px] font-serif px-1.5 py-0.5 rounded-full border ${
               estadoSemaforo === 'red'
-                ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                ? 'bg-[#d97757]/10 text-[#d97757] border-[#d97757]/20'
                 : estadoSemaforo === 'amber'
-                ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                ? 'bg-[#d4a373]/10 text-[#d4a373] border-[#d4a373]/20'
+                : 'bg-[#849d85]/10 text-[#849d85] border-[#849d85]/20'
             }`}
           >
             {estadoSemaforo === 'red' ? 'ALERTA' : estadoSemaforo === 'amber' ? 'DESVÍO' : 'OK'}
@@ -227,111 +226,99 @@ function CarpaCard({ carpa }: { carpa: any }) {
       </div>
 
       {/* ── VPD HERO METRIC ── */}
-      <div className="flex flex-col items-center justify-center py-3 border-y border-[#1e293b]/50 mb-3">
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">
+      <div className="flex flex-col items-center justify-center py-5 border-y border-[#3d3a35] mb-4">
+        <span className="text-xs font-serif text-[#a3a19e] uppercase tracking-widest mb-1">
           VPD
         </span>
         <span
-          className={`text-5xl font-black leading-none tabular-nums ${vpdColor(vpd)} ${vpdGlowClass(vpd)}`}
+          className={`text-6xl font-serif font-medium leading-none tabular-nums ${vpdColor(vpd)}`}
         >
           {vpd.toFixed(2)}
         </span>
-        <span className="text-[10px] text-muted-foreground mt-1 font-medium">
-          {vpdLabel(vpd)}
-        </span>
-        <span className="text-[9px] text-muted-foreground/60 mt-0.5">
-          rango óptimo: 0.8 – 1.2 kPa
+        <span className="text-sm font-serif text-[#a3a19e] mt-2 tracking-wide">
+          0.8 - 1.2 kPa
         </span>
       </div>
 
       {/* ── SENSOR SUB-METRICS (3 chips) ── */}
-      <div className="flex gap-2 mb-3">
+      <div className="flex gap-2 mb-4">
         {/* Temperature chip */}
         <SensorChip
-          icon={<Thermometer className="w-3 h-3 text-orange-400 shrink-0" />}
+          icon={<Thermometer className="w-3 h-3 text-[#d4a373] shrink-0" />}
           value={temp}
           unit="°C"
           min={15}
           max={35}
           barColor={
-            Math.abs(temp - sensores.temp.esperado) >= 3 ? 'bg-amber-400' : 'bg-orange-400'
+            Math.abs(temp - sensores.temp.esperado) >= 3 ? 'bg-[#d4a373]' : 'bg-[#849d85]'
           }
         />
         {/* Humidity chip */}
         <SensorChip
-          icon={<Droplet className="w-3 h-3 text-blue-400 shrink-0" />}
+          icon={<Droplet className="w-3 h-3 text-[#d4a373] shrink-0" />}
           value={humidity}
           unit="%"
           min={30}
           max={90}
           barColor={
-            Math.abs(humidity - sensores.humedad.esperado) >= 10 ? 'bg-amber-400' : 'bg-blue-400'
+            Math.abs(humidity - sensores.humedad.esperado) >= 10 ? 'bg-[#d4a373]' : 'bg-[#849d85]'
           }
         />
         {/* CO2 / Luz chip (static) */}
         <SensorChip
-          icon={<Sun className="w-3 h-3 text-emerald-400 shrink-0" />}
+          icon={<Sun className="w-3 h-3 text-[#849d85] shrink-0" />}
           value={420}
           unit="ppm"
           min={300}
           max={1200}
-          barColor="bg-emerald-500"
+          barColor="bg-[#849d85]"
         />
       </div>
 
       {/* ── SPARKLINE (deterministic, temp history) ── */}
-      <div className="w-full mb-3">
+      <div className="w-full mb-4">
         <svg
           viewBox="0 0 120 30"
           preserveAspectRatio="none"
           className="w-full h-[30px]"
           aria-hidden="true"
         >
-          {/* Subtle gradient fill under the line */}
-          <defs>
-            <linearGradient id={`spark-fill-${lote.id}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={sparkStroke} stopOpacity="0.2" />
-              <stop offset="100%" stopColor={sparkStroke} stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          {/* Area fill */}
-          {polyline && (
-            <polygon
-              points={`0,30 ${polyline} 120,30`}
-              fill={`url(#spark-fill-${lote.id})`}
+          {/* Line */}
+          {smoothPath && (
+            <path
+              fill="none"
+              stroke={sparkStroke}
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d={smoothPath}
             />
           )}
-          {/* Line */}
-          <polyline
-            fill="none"
-            stroke={sparkStroke}
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            points={polyline}
-          />
           {/* Current dot */}
           {sparkPoints.length > 0 && (() => {
             const lastIdx = sparkPoints.length - 1;
-            const lastY = 30 - ((sparkPoints[lastIdx] - Math.min(...sparkPoints) + 0.5) / (Math.max(...sparkPoints) - Math.min(...sparkPoints) + 1)) * 30;
+            const minV = Math.min(...sparkPoints) - 0.5;
+            const maxV = Math.max(...sparkPoints) + 0.5;
+            const range = maxV - minV || 1;
+            const lastY = 30 - ((sparkPoints[lastIdx] - minV) / range) * 30;
             return <circle cx="120" cy={lastY.toFixed(1)} r="2.5" fill={sparkStroke} />;
           })()}
         </svg>
-        <div className="flex justify-between mt-0.5 px-0.5">
-          <span className="text-[8px] text-muted-foreground/50">Historial temp.</span>
-          <span className="text-[8px] text-muted-foreground/50">{temp.toFixed(1)}°C ahora</span>
+        <div className="flex justify-between mt-1 px-1">
+          <span className="text-[10px] text-[#a3a19e] font-serif">Historial temp.</span>
+          <span className="text-[10px] text-[#a3a19e] font-serif">{temp.toFixed(1)}°C ahora</span>
         </div>
       </div>
 
       {/* ── FOOTER: desvíos + link ── */}
-      <div className="mt-auto border-t border-[#1e293b]/50 pt-2.5 flex justify-between items-center">
-        <span className="text-[10px] text-muted-foreground">
+      <div className="mt-auto border-t border-[#3d3a35] pt-3 flex justify-between items-center">
+        <span className="text-[10px] text-[#a3a19e] font-serif">
           {totalDesvios} desvíos en ciclo
         </span>
         <Link
           href="/informe"
           onClick={() => setSelectedLoteId(lote.id)}
-          className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 group/btn min-h-[44px] flex items-center"
+          className="text-xs font-serif font-medium text-[#849d85] hover:text-[#9bb39c] flex items-center gap-1 group/btn min-h-[44px]"
         >
           <span>Ver Informe</span>
           <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
