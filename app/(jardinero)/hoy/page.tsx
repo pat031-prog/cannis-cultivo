@@ -349,7 +349,7 @@ export default function ModoHoyPage() {
   // ── render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="flex flex-col gap-8 pb-12">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -371,7 +371,7 @@ export default function ModoHoyPage() {
       </div>
 
       {/* ── 1. CARPA CARDS — vertical, horizontally scrollable on mobile ── */}
-      <div className="overflow-x-auto flex gap-4 pb-2 snap-x snap-mandatory md:overflow-visible md:grid md:grid-cols-3">
+      <div className="overflow-x-auto flex gap-6 pb-2 snap-x snap-mandatory md:overflow-visible md:grid md:grid-cols-3">
         {lotesStatus.map((status) => {
           const isSelected = selectedLote?.id === status.lote.id;
 
@@ -387,10 +387,10 @@ export default function ModoHoyPage() {
                 setSelectedLote(status.lote);
                 setExpandedTask(null);
               }}
-              className={`snap-center min-w-[200px] md:min-w-0 min-h-[160px] p-4 rounded-3xl border transition-all text-left flex flex-col items-center gap-3 relative overflow-hidden ${
+              className={`snap-center min-w-[200px] md:min-w-0 min-h-[160px] p-6 rounded-3xl ring-1 ring-inset shadow-sm shadow-black/40 transition-all text-left flex flex-col items-center gap-6 relative overflow-hidden ${
                 isSelected
-                  ? 'bg-[#2a2928] border-[#849d85] shadow-none'
-                  : 'bg-[#2a2928] border-[#3a3938] hover:border-[#849d85]/50'
+                  ? 'bg-[#2a2928] ring-[#849d85]'
+                  : 'bg-[#2a2928] ring-white/5 hover:ring-[#849d85]/50'
               }`}
             >
               {/* Progress ring — centred, 80×80 */}
@@ -406,7 +406,7 @@ export default function ModoHoyPage() {
                     cy="40"
                     r={radius}
                     stroke="#1e293b"
-                    strokeWidth="7"
+                    strokeWidth="4"
                     fill="transparent"
                   />
                   <circle
@@ -414,7 +414,7 @@ export default function ModoHoyPage() {
                     cy="40"
                     r={radius}
                     stroke="#10b981"
-                    strokeWidth="7"
+                    strokeWidth="4"
                     strokeDasharray={circumference}
                     strokeDashoffset={strokeDashoffset}
                     strokeLinecap="round"

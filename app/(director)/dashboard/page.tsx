@@ -123,7 +123,7 @@ function SensorChip({
 }) {
   const pct = progressPercent(value, min, max);
   return (
-    <div className="flex-1 min-w-0 bg-[#323130] border border-[#3d3a35] rounded-xl p-2.5 flex flex-col gap-1.5 min-h-[44px]">
+    <div className="flex-1 min-w-0 bg-[#323130] ring-1 ring-inset ring-white/5 rounded-xl p-2.5 flex flex-col gap-1.5 min-h-[44px] shadow-sm shadow-black/40">
       <div className="flex items-center gap-1">
         {icon}
         <span className="font-bold text-sm text-[#e0deda] leading-none">{value.toFixed(1)}</span>
@@ -154,12 +154,12 @@ function CarpaCard({ carpa }: { carpa: any }) {
   const smoothPath = buildSmoothPath(sparkPoints);
 
   // Card border based on semáforo state
-  const borderClass =
+  const ringClass =
     estadoSemaforo === 'red'
-      ? 'border-[#d97757]/40'
+      ? 'ring-[#d97757]/40'
       : estadoSemaforo === 'amber'
-      ? 'border-[#d4a373]/30'
-      : 'border-[#3d3a35] hover:border-[#849d85]/30';
+      ? 'ring-[#d4a373]/30'
+      : 'ring-white/5 hover:ring-[#849d85]/30';
 
   // Sparkline stroke color
   const sparkStroke =
@@ -172,9 +172,9 @@ function CarpaCard({ carpa }: { carpa: any }) {
       className={`
         snap-center min-w-[280px] flex-shrink-0
         md:min-w-0 md:flex-shrink
-        bg-[#2a2928] border rounded-2xl p-5 flex flex-col min-h-[280px]
-        relative overflow-hidden group transition-all
-        ${borderClass}
+        bg-[#2a2928] ring-1 ring-inset rounded-2xl p-8 flex flex-col min-h-[280px]
+        relative overflow-hidden group transition-all shadow-sm shadow-black/40
+        ${ringClass}
       `}
     >
       {/* Top accent bar */}
@@ -231,7 +231,7 @@ function CarpaCard({ carpa }: { carpa: any }) {
           VPD
         </span>
         <span
-          className={`text-6xl font-serif font-medium leading-none tabular-nums ${vpdColor(vpd)}`}
+          className={`text-6xl font-serif font-medium tracking-tighter leading-none tabular-nums ${vpdColor(vpd)}`}
         >
           {vpd.toFixed(2)}
         </span>
@@ -241,7 +241,7 @@ function CarpaCard({ carpa }: { carpa: any }) {
       </div>
 
       {/* ── SENSOR SUB-METRICS (3 chips) ── */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-6 mb-4">
         {/* Temperature chip */}
         <SensorChip
           icon={<Thermometer className="w-3 h-3 text-[#d4a373] shrink-0" />}

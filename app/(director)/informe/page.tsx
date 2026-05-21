@@ -305,7 +305,7 @@ export default function VistaNerdPage() {
             </div>
 
             {/* Scrollable timeline logbook */}
-            <div className="max-h-[800px] overflow-y-auto pr-4 space-y-0 no-scrollbar relative">
+            <div className="max-h-[800px] overflow-y-auto pr-6 space-y-0 no-scrollbar relative">
               {registrosFiltrados.slice().reverse().map((rd, rdIndex) => {
                 const lotObj   = lote;
                 const diaCiclo = lotObj ? mockDb.calcularDiaDeCiclo(lotObj.fecha_inicio, rd.fecha) : 1;
@@ -339,7 +339,7 @@ export default function VistaNerdPage() {
                   .filter(dc => dc.campo === 'pH' || dc.campo === 'EC (mS/cm)');
 
                 return (
-                  <div key={rd.id} className="relative pl-6 pb-10 border-l border-[#2a2d2a] last:border-0 last:pb-0">
+                  <div key={rd.id} className="relative pl-6 pb-12 border-l border-[#2a2d2a] last:border-0 last:pb-0">
                     
                     {/* Logbook Timeline Node */}
                     <div className={`absolute -left-[3.5px] top-1.5 w-1.5 h-1.5 rounded-full ${
@@ -368,7 +368,7 @@ export default function VistaNerdPage() {
 
                       {/* PLAN vs REAL Comparison */}
                       {(planPrimario || realRiego) && (
-                        <div className="grid grid-cols-2 gap-6 bg-[#181a19] p-5 border border-[#2a2d2a]">
+                        <div className="grid grid-cols-2 gap-6 bg-[#181a19] p-6 border border-[#2a2d2a]">
                           
                           {/* LEFT: PLAN (Ghosted) */}
                           <div className="space-y-3">
@@ -438,7 +438,7 @@ export default function VistaNerdPage() {
 
                       {/* Deviations flat chips */}
                       {tieneDesvios && desvioParams.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-3">
                           {desvioParams.map((dc, i) => {
                             const delta = dc.magnitud;
                             const sign  = delta !== null && delta > 0 ? '+' : '';
@@ -446,8 +446,9 @@ export default function VistaNerdPage() {
                             return (
                               <span
                                 key={i}
-                                className="text-[11px] font-mono px-2 py-1 bg-[#d97757]/10 text-[#d97757] border border-[#d97757]/30"
+                                className="text-[11px] font-mono px-2 py-1 bg-transparent border border-[#d97757]/30 text-[#d97757] font-medium flex items-center gap-1.5 rounded-sm"
                               >
+                                <span className="w-1 h-1 rounded-full bg-[#d97757]/70" />
                                 Δ {label} {sign}{delta !== null ? delta.toFixed(1) : '—'}
                               </span>
                             );
@@ -472,11 +473,12 @@ export default function VistaNerdPage() {
                                     {ra.tipo.charAt(0).toUpperCase() + ra.tipo.slice(1)}
                                   </span>
                                   {err && (
-                                    <span className={`text-[10px] font-mono px-1.5 py-0.5 border ${
+                                    <span className={`text-[10px] font-mono px-1.5 py-0.5 border flex items-center gap-1.5 rounded-sm ${
                                       err.gravedadGeneral === 'grave'
-                                        ? 'bg-[#d97757]/10 text-[#d97757] border-[#d97757]/30'
-                                        : 'bg-[#c28b33]/10 text-[#c28b33] border-[#c28b33]/30'
+                                        ? 'bg-transparent text-[#d97757] border-[#d97757]/30 font-medium'
+                                        : 'bg-transparent text-[#c28b33] border-[#c28b33]/30 font-medium'
                                     }`}>
+                                      <span className={`w-1 h-1 rounded-full ${err.gravedadGeneral === 'grave' ? 'bg-[#d97757]/70' : 'bg-[#c28b33]/70'}`} />
                                       DESVÍO
                                     </span>
                                   )}

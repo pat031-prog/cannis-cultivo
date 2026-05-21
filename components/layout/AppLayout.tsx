@@ -77,7 +77,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const filteredMenuItems = MENU_ITEMS.filter(item => item.roles.includes(activeRole));
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#1f1e1d] text-[#f4f1ea] select-none">
+    <div className="min-h-screen flex flex-col bg-[#1f1e1d] text-[#f4f1ea] select-none bg-noise">
       
       {/* 1. TOP HEADER NAVIGATION */}
       <header className="sticky top-0 z-40 w-full bg-[#1f1e1d] border-b border-[#3a3938] px-4 md:px-8 py-3 flex items-center justify-between">
